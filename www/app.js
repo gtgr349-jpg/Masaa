@@ -2332,6 +2332,7 @@ window.journeyBack = function () {
    ========================================================= */
 
 function masaaEnterAsGuest() {
+    sessionStorage.setItem("masaaGuestSession", "true");
     const entryScreen = document.getElementById("masaaEntryScreen");
 
     if (entryScreen) {
@@ -2374,6 +2375,8 @@ function initMasaaEntryScreen() {
 document.addEventListener("DOMContentLoaded", () => {
     initMasaaEntryScreen();
 });
+
+
 
 
 
