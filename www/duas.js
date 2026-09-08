@@ -450,3 +450,20 @@
 
 })();
 
+
+document.addEventListener("DOMContentLoaded", function () {
+    if (!window.MasaaNavigation) return;
+
+    MasaaNavigation.subscribe(function (state) {
+        if (!state) return;
+
+        if (
+            state.masaaRoute === "duas" ||
+            state.masaaRoute === "duas-category" ||
+            state.masaaRoute === "duas-reader"
+        ) {
+            window.renderDuaHistory(state);
+        }
+    });
+});
+

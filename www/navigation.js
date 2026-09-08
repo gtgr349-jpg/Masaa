@@ -166,25 +166,8 @@
     /*
      * Ø¥Ø¶Ø§ÙØ© Route Ø¬Ø¯ÙŠØ¯ Ø¥Ù„Ù‰ History
      */
-    function push(route, data, hash) {
+    function push(route, data, hash) { const currentState=getCurrentState(); const currentDepth=currentState && Number.isInteger(currentState.masaaDepth) ? currentState.masaaDepth : 0; const state=createState(route,{...(data||{}),masaaDepth:currentDepth+1}); history.pushState(state,"",buildUrl(hash)); notify(state,"push"); return state; }
 
-        const state =
-            createState(route, data);
-
-        history.pushState(
-            state,
-            "",
-            buildUrl(hash)
-        );
-
-        notify(state, "push");
-
-        return state;
-    }
-
-    /*
-     * Ø§Ø³ØªØ¨Ø¯Ø§Ù„ Route Ø§Ù„Ø­Ø§Ù„ÙŠ
-     */
     function replace(route, data, hash) {
 
         const state =
@@ -221,36 +204,8 @@
      * Ù„Ø§ Ù†Ù‚ÙˆÙ… Ø¨Ø¹Ù…Ù„ push Ù„Ù…Ø³Ø§Ø± Home Ø¬Ø¯ÙŠØ¯ ÙÙˆÙ‚
      * Ø§Ù„Ù…Ø³Ø§Ø± Ø§Ù„Ø¯Ø§Ø®Ù„ÙŠ Ø­ØªÙ‰ Ù„Ø§ ØªØªÙƒÙˆÙ† Ø³Ù„Ø³Ù„Ø© Ø±Ø¬ÙˆØ¹ ØºØ±ÙŠØ¨Ø©.
      */
-    function home() {
+    function home() { const currentState=getCurrentState(); const depth=currentState && Number.isInteger(currentState.masaaDepth) ? currentState.masaaDepth : 0; if(depth>0){ history.go(-depth); return; } const state=createState("home",{masaaDepth:0}); history.replaceState(state,"",buildUrl("")); notify(state,"home"); }
 
-        const state =
-            createState("home");
-
-        history.replaceState(
-            state,
-            "",
-            buildUrl("")
-        );
-
-        notify(state, "home");
-
-        /*
-         * Ø¥Ø±Ø³Ø§Ù„ popstate ÙŠØ¯ÙˆÙŠÙ‹Ø§ Ø­ØªÙ‰ ØªÙ‚ÙˆÙ…
-         * ÙˆØ§Ø¬Ù‡Ø© Ø§Ù„ØªØ·Ø¨ÙŠÙ‚ Ø¨Ø¹Ø±Ø¶ Home ÙÙˆØ±Ù‹Ø§.
-         */
-        window.dispatchEvent(
-            new PopStateEvent(
-                "popstate",
-                {
-                    state: state
-                }
-            )
-        );
-    }
-
-    /*
-     * Ø§Ù„Ø§Ù†ØªÙ‚Ø§Ù„ Ø¥Ù„Ù‰ Ù‚Ø³Ù… Ø±Ø¦ÙŠØ³ÙŠ
-     */
     function goToSection(section) {
 
         const config =
@@ -984,3 +939,5 @@
         MasaaNavigation.initialize();
     }
 });
+
+

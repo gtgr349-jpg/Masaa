@@ -1937,8 +1937,11 @@ console.log("⭐ نظام التقييم اليومي جاهز");
 
         if (!hash) return;
 
-        if (hash === "duas") {
-            window.openSection("duas");
+        if (
+            hash === "duas" ||
+            hash.indexOf("duas-category-") === 0 ||
+            hash.indexOf("dua-") === 0
+        ) {
             return;
         }
 
@@ -2151,7 +2154,14 @@ console.log("⭐ نظام التقييم اليومي جاهز");
          * أي History تم إنشاؤه بواسطة Navigation Manager
          * يتم التعامل معه مركزيًا، ولا يتدخل فيه app.js.
          */
-        if (state.masaaNavigation === true) {
+        if (
+            state.masaaNavigation === true &&
+            (
+                state.masaaRoute === "duas" ||
+                state.masaaRoute === "duas-category" ||
+                state.masaaRoute === "duas-reader"
+            )
+        ) {
             return;
         }
 
@@ -2435,6 +2445,9 @@ function initMasaaEntryScreen() {
 document.addEventListener("DOMContentLoaded", () => {
     initMasaaEntryScreen();
 });
+
+
+
 
 
 
