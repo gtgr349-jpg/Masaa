@@ -1,550 +1,855 @@
-// ======================================================
-// 🌙 أيوشتي
-// التطبيق الرئيسي
-// ======================================================
+﻿/* =========================================================
+   🌙 MASAA — MAIN APP
+   Premium UI + Existing Functionality
+   ========================================================= */
 
 
-// ======================================================
-// ⚙️ إعدادات الرحلة
-// ======================================================
+/* =========================
+   ✈️ TRIP SETTINGS
+   ========================= */
 
-// سبتمبر = الشهر رقم 8 في JavaScript
 const TRIP_START = new Date(2026, 8, 5);
-
 const TRIP_DAYS = 14;
 
 
-// ======================================================
-// 📅 حساب يوم الرحلة
-// ======================================================
+/* =========================
+   📅 TRIP CALCULATIONS
+   ========================= */
 
 function getTripDay() {
 
     const today = new Date();
 
-    today.setHours(0, 0, 0, 0);
-
-    const start = new Date(TRIP_START);
-
-    start.setHours(0, 0, 0, 0);
-
-    const difference = today - start;
-
-    const daysPassed = Math.floor(
-        difference / (1000 * 60 * 60 * 24)
+    const start = new Date(
+        TRIP_START.getFullYear(),
+        TRIP_START.getMonth(),
+        TRIP_START.getDate()
     );
 
-    return daysPassed + 1;
+    const current = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+    );
+
+    const diff =
+        current.getTime() - start.getTime();
+
+    return Math.floor(
+        diff / (1000 * 60 * 60 * 24)
+    ) + 1;
 }
 
-
-// ======================================================
-// 📅 حالة الرحلة
-// ======================================================
 
 function getTripStatus() {
 
     const today = new Date();
 
-    today.setHours(0, 0, 0, 0);
-
-    const start = new Date(TRIP_START);
-
-    start.setHours(0, 0, 0, 0);
+    const start = new Date(
+        TRIP_START.getFullYear(),
+        TRIP_START.getMonth(),
+        TRIP_START.getDate()
+    );
 
     const end = new Date(start);
 
     end.setDate(
-        end.getDate() + TRIP_DAYS - 1
+        start.getDate() + TRIP_DAYS - 1
     );
 
 
-    // -----------------------------
-    // قبل الرحلة
-    // -----------------------------
-
     if (today < start) {
 
-        const difference = start - today;
-
-        const remainingDays = Math.ceil(
-            difference /
-            (1000 * 60 * 60 * 24)
-        );
+        const remaining =
+            Math.ceil(
+                (start - today) /
+                (1000 * 60 * 60 * 24)
+            );
 
         return {
             status: "before",
-            remainingDays: remainingDays
+            remainingDays: remaining
         };
     }
 
 
-    // -----------------------------
-    // أثناء الرحلة
-    // -----------------------------
-
-    if (
-        today >= start &&
-        today <= end
-    ) {
+    if (today > end) {
 
         return {
-            status: "during",
-            day: getTripDay()
+            status: "after"
         };
     }
 
 
-    // -----------------------------
-    // بعد الرحلة
-    // -----------------------------
-
     return {
-        status: "after"
+        status: "during",
+        day: getTripDay()
     };
 }
 
 
-// ======================================================
-// 🕋 تحديث بطاقة الرحلة الرئيسية
-// ======================================================
+/* =========================
+   ✨ TRIP PROGRESS UI
+   ========================= */
 
-function updateTripUI() {
+function ensureTripProgressUI() {
 
-    const trip = getTripStatus();
+    const tripCard =
+        document.querySelector(".trip-card");
 
-    const tripIcon =
-        document.getElementById("tripIcon");
-
-    const tripTitle =
-        document.getElementById("tripTitle");
-
-    const tripDay =
-        document.getElementById("tripDay");
-
-    const tripMessage =
-        document.getElementById("tripMessage");
+    if (!tripCard) return null;
 
 
-    if (
-        !tripIcon ||
-        !tripTitle ||
-        !tripDay ||
-        !tripMessage
-    ) {
-        return;
+    let progress =
+        tripCard.querySelector(".trip-progress-wrap");
+
+
+    if (!progress) {
+
+        progress =
+            document.createElement("div");
+
+        progress.className =
+            "trip-progress-wrap";
+
+        progress.innerHTML = `
+
+            <div class="trip-progress-info">
+
+                <span class="trip-progress-label">
+                    استعداد الرحلة
+                </span>
+
+                <span
+                    class="trip-progress-percent"
+                    id="tripProgressPercent">
+                    0%
+                </span>
+
+            </div>
+
+            <div class="trip-progress-bar">
+
+                <div
+                    class="trip-progress-fill"
+                    id="tripProgressFill">
+                </div>
+
+            </div>
+
+        `;
+
+
+        tripCard.appendChild(progress);
     }
 
 
-    // -----------------------------
-    // قبل الرحلة
-    // -----------------------------
-
-    if (trip.status === "before") {
-
-        tripIcon.textContent = "✈️";
-
-        tripTitle.textContent =
-            "رحلتك قريبة يا أيوشتي 🤍";
-
-        tripDay.textContent =
-            trip.remainingDays === 1
-                ? "متبقي يوم واحد 🤍"
-                : `متبقي ${trip.remainingDays} أيام`;
-
-        tripMessage.textContent =
-            "استعدي يا أيوشتي... ربنا يكتب لكِ رحلة مباركة، ويحفظك في طريقك، ويبلغك بيته وأنتِ في أجمل حال. 🤲🏻";
-
-        return;
-    }
-
-
-    // -----------------------------
-    // أثناء الرحلة
-    // -----------------------------
-
-    if (trip.status === "during") {
-
-        tripIcon.textContent = "🕋";
-
-        tripTitle.textContent =
-            "رحلتك إلى بيت الله 🤍";
-
-        tripDay.textContent =
-            `اليوم ${trip.day} من ${TRIP_DAYS}`;
-
-        tripMessage.textContent =
-            "ربنا يتقبل منكِ، ويجعل كل خطوة وكل دعاء وكل لحظة في ميزان حسناتكِ. 🤲🏻";
-
-        return;
-    }
-
-
-    // -----------------------------
-    // بعد الرحلة
-    // -----------------------------
-
-    tripIcon.textContent = "❤️";
-
-    tripTitle.textContent =
-        "رحلة مباركة يا أيوشتي";
-
-    tripDay.textContent =
-        "اكتملت رحلة الـ14 يوم";
-
-    tripMessage.textContent =
-        "تقبل الله عمرتكِ، وكتب لكِ العودة إلى بيته مرات ومرات. 🤍";
+    return progress;
 }
 
 
-// ======================================================
-// 📂 فتح الأقسام
-// ======================================================
+/* =========================
+   🕌 UPDATE TRIP UI
+   ========================= */
+
+function updateTripUI() {
+
+    const status =
+        getTripStatus();
+
+
+    const icon =
+        document.getElementById("tripIcon");
+
+    const title =
+        document.getElementById("tripTitle");
+
+    const day =
+        document.getElementById("tripDay");
+
+    const message =
+        document.getElementById("tripMessage");
+
+
+    if (!icon || !title || !day || !message) {
+        return;
+    }
+
+
+    ensureTripProgressUI();
+
+
+    const fill =
+        document.getElementById("tripProgressFill");
+
+    const percent =
+        document.getElementById(
+            "tripProgressPercent"
+        );
+
+    const label =
+        document.querySelector(
+            ".trip-progress-label"
+        );
+
+
+    /* =========================
+       BEFORE TRIP
+       ========================= */
+
+    if (status.status === "before") {
+
+        icon.textContent = "✈️";
+
+        title.textContent =
+            "رحلتك قريبة يا مَسْعَى 🤍";
+
+        day.textContent =
+            status.remainingDays === 1
+                ? "باقي يوم واحد فقط ✨"
+                : `متبقي ${status.remainingDays} أيام ✨`;
+
+        message.textContent =
+            "جهزي قلبك قبل شنطتك… رحلة جميلة إلى بيت الله بإذن الله 🤲🏻";
+
+
+        const totalPreparationDays = 14;
+
+        const passed =
+            Math.max(
+                0,
+                totalPreparationDays -
+                status.remainingDays
+            );
+
+        const progressValue =
+            Math.min(
+                100,
+                Math.round(
+                    (passed / totalPreparationDays) * 100
+                )
+            );
+
+
+        if (fill) {
+            fill.style.width =
+                `${progressValue}%`;
+        }
+
+        if (percent) {
+            percent.textContent =
+                `${progressValue}%`;
+        }
+
+        if (label) {
+            label.textContent =
+                "الاستعداد للرحلة";
+        }
+
+        return;
+    }
+
+
+    /* =========================
+       DURING TRIP
+       ========================= */
+
+    if (status.status === "during") {
+
+        const currentDay =
+            Math.min(
+                TRIP_DAYS,
+                Math.max(
+                    1,
+                    status.day
+                )
+            );
+
+
+        const progressValue =
+            Math.round(
+                (currentDay / TRIP_DAYS) * 100
+            );
+
+
+        icon.textContent = "🕋";
+
+        title.textContent =
+            "رحلتك إلى بيت الله 🤍";
+
+        day.textContent =
+            `اليوم ${currentDay} من ${TRIP_DAYS}`;
+
+        message.textContent =
+            "كل خطوة في رحلتك لها حكاية… عيشيها بهدوء وقرب من ربنا 🤲🏻";
+
+
+        if (fill) {
+            fill.style.width =
+                `${progressValue}%`;
+        }
+
+        if (percent) {
+            percent.textContent =
+                `${progressValue}%`;
+        }
+
+        if (label) {
+            label.textContent =
+                "تقدم الرحلة";
+        }
+
+        return;
+    }
+
+
+    /* =========================
+       AFTER TRIP
+       ========================= */
+
+    icon.textContent = "❤️";
+
+    title.textContent =
+        "رحلة مباركة يا مَسْعَى";
+
+    day.textContent =
+        "اكتملت رحلة الـ14 يوم ✨";
+
+    message.textContent =
+        "تقبل الله عمرتك وطاعتك، وجعلها بداية لأيام أجمل وأقرب إليه 🤍";
+
+
+    if (fill) {
+        fill.style.width = "100%";
+    }
+
+    if (percent) {
+        percent.textContent = "100%";
+    }
+
+    if (label) {
+        label.textContent =
+            "اكتملت الرحلة";
+    }
+}
+
+
+/* =========================
+   🧭 OPEN SECTIONS
+   ========================= */
 
 function openSection(section) {
 
     closeSections();
 
-    const element = document.getElementById(
-        section + "Section"
-    );
 
-    if (!element) {
-        console.error(
-            "❌ القسم غير موجود:",
+    const target =
+        document.getElementById(
             section + "Section"
         );
-        return;
-    }
-
-    element.classList.remove("hidden");
-
-    const header = document.querySelector(".header");
-    const tripCard = document.querySelector(".trip-card");
-    const messageCard = document.querySelector(".message-card");
-    const menu = document.querySelector(".menu");
-
-    if (header) header.classList.add("hidden");
-    if (tripCard) tripCard.classList.add("hidden");
-    if (messageCard) messageCard.classList.add("hidden");
-    if (menu) menu.classList.add("hidden");
 
 
-    // 🕋 عمرتي
+    if (!target) return;
+
+
+    target.classList.remove("hidden");
+
+
+    const elementsToHide = [
+        ".header",
+        ".trip-card",
+        ".message-card",
+        ".notification-button",
+        ".menu"
+    ];
+
+
+    elementsToHide.forEach(selector => {
+
+        const element =
+            document.querySelector(selector);
+
+        if (element) {
+            element.classList.add("hidden");
+        }
+
+    });
+
+
     if (section === "umrah") {
-        renderUmrah();
-    }
 
-
-    // 📅 رحلتي
-    if (section === "journey") {
-        renderJourney();
-    }
-
-
-    // 💌 من إسلام
-    if (section === "messages") {
-        renderMessagesSection();
-    }
-
-
-    // 🗺️ خريطتي
-    if (section === "map") {
-
-        if (typeof initMap === "function") {
-            initMap();
-        } else {
-            console.error("❌ initMap غير موجودة في map.js");
+        if (typeof renderUmrah === "function") {
+            renderUmrah();
         }
 
     }
 
+
+    if (section === "journey") {
+
+        if (typeof renderJourney === "function") {
+            renderJourney();
+        }
+
+    }
+
+    if (
+        section === "map" &&
+        typeof initMap === "function"
+    ) {
+        initMap();
+    }
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
 }
 
-// ======================================================
-// 🏠 إغلاق الأقسام والعودة للرئيسية
-// ======================================================
+
+/* =========================
+   🏠 CLOSE SECTIONS
+   ========================= */
 
 function closeSections() {
 
-    const sections =
-        document.querySelectorAll(
-            ".page-section"
-        );
+    document
+        .querySelectorAll(".page-section")
+        .forEach(section => {
+
+            section.classList.add("hidden");
+
+        });
 
 
-    sections.forEach(section => {
+    const elementsToShow = [
+        ".header",
+        ".trip-card",
+        ".message-card",
+        ".notification-button",
+        ".menu"
+    ];
 
-        section.classList.add("hidden");
+
+    elementsToShow.forEach(selector => {
+
+        const element =
+            document.querySelector(selector);
+
+        if (element) {
+            element.classList.remove("hidden");
+        }
 
     });
 
 
-    const header =
-        document.querySelector(".header");
-
-    const tripCard =
-        document.querySelector(".trip-card");
-
-    const messageCard =
-        document.querySelector(".message-card");
-
-    const menu =
-        document.querySelector(".menu");
-
-
-    if (header)
-        header.classList.remove("hidden");
-
-    if (tripCard)
-        tripCard.classList.remove("hidden");
-
-    if (messageCard)
-        messageCard.classList.remove("hidden");
-
-    if (menu)
-        menu.classList.remove("hidden");
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
 }
 
 
-// ======================================================
-// 📅 عرض أيام الرحلة
-// ======================================================
+/* =========================================================
+   📅 JOURNEY
+   ========================================================= */
 
 function renderJourney() {
 
-    const container =
-        document.getElementById("journeyList");
+    const section = document.getElementById("journeySection");
 
-
-    if (!container) return;
-
-
-    container.innerHTML = "";
-
-
-    if (typeof journeyDays === "undefined") {
-
-        console.error(
-            "❌ journeyDays غير معرفة"
-        );
-
-        container.innerHTML = `
-            <div class="info-box">
-                لم يتم تحميل بيانات الرحلة.
-            </div>
-        `;
-
+    if (!section) {
         return;
     }
 
 
-    const trip = getTripStatus();
+    const savedDay =
+        parseInt(
+            localStorage.getItem("masaaCurrentJourneyDay") || "1"
+        );
 
-    let currentDay = 0;
-
-
-    if (trip.status === "during") {
-
-        currentDay = trip.day;
-
-    }
-
-
-    journeyDays.forEach(day => {
-
-        const card =
-            document.createElement("div");
+    let currentDay =
+        Math.min(
+            Math.max(savedDay, 1),
+            journeyDays.length
+        );
 
 
-        let dayStatus = "";
+    function renderCurrentDay() {
+
+        const day = journeyDays[currentDay - 1];
+
+        const progress =
+            getJourneyDayProgress(day);
 
 
-        if (trip.status === "before") {
+        let totalTasks = 0;
+        let completedTasks = 0;
 
-            dayStatus = "upcoming";
+        journeyDays.forEach(item => {
 
-        }
+            totalTasks += item.tasks.length;
 
-        else if (trip.status === "during") {
+            item.tasks.forEach((task, index) => {
 
-            if (day.day < currentDay) {
-
-                dayStatus = "completed";
-
-            }
-
-            else if (day.day === currentDay) {
-
-                dayStatus = "today";
-
-            }
-
-            else {
-
-                dayStatus = "upcoming";
-
-            }
-
-        }
-
-        else {
-
-            dayStatus = "completed";
-
-        }
-
-
-        card.className =
-            `journey-card ${dayStatus}`;
-
-
-        let statusIcon = day.icon;
-
-
-        if (dayStatus === "completed") {
-
-            statusIcon = "✅";
-
-        }
-
-
-        if (dayStatus === "today") {
-
-            statusIcon = "📍";
-
-        }
-
-
-        if (dayStatus === "upcoming") {
-
-            statusIcon = "🔒";
-
-        }
-
-
-        let tasksHTML = "";
-
-
-        if (
-            day.tasks &&
-            day.tasks.length
-        ) {
-
-            day.tasks.forEach(task => {
-
-                tasksHTML += `
-                    <li>
-                        ${task}
-                    </li>
-                `;
+                if (
+                    isJourneyTaskCompleted(
+                        item.day,
+                        index
+                    )
+                ) {
+                    completedTasks++;
+                }
 
             });
 
-        }
+        });
 
 
-        let statusText = "";
+        const journeyProgress =
+            totalTasks
+                ? Math.round(
+                    (completedTasks / totalTasks) * 100
+                )
+                : 0;
 
 
-        if (dayStatus === "completed") {
+        section.innerHTML = `
 
-            statusText =
-                "تم الانتهاء ✅";
+            <button
+                class="back-button" onclick="journeyBack()"> ← الرئيسية
 
-        }
-
-        else if (dayStatus === "today") {
-
-            statusText =
-                "يومك الحالي 🤍";
-
-        }
-
-        else {
-
-            statusText =
-                "قادم 🔒";
-
-        }
+            </button>
 
 
-        card.innerHTML = `
+            <h2>
+                📅 رحلة مَسْعَى
+            </h2>
 
-            <div class="journey-header">
-
-                <div class="journey-icon">
-                    ${statusIcon}
-                </div>
-
-                <div>
-
-                    <h3>
-                        اليوم ${day.day}
-                    </h3>
-
-                    <small>
-                        ${day.date}
-                    </small>
-
-                </div>
-
-            </div>
-
-
-            <div class="journey-status">
-                ${statusText}
-            </div>
-
-
-            <h4>
-                ${day.title}
-            </h4>
-
-
-            <p>
-                ${day.description}
+            <p class="section-subtitle">
+                14 يومًا من الذكر والدعاء والطمأنينة 🤍
             </p>
 
 
-            ${
-                tasksHTML
-                    ? `
-                        <ul>
-                            ${tasksHTML}
-                        </ul>
-                    `
-                    : ""
-            }
+            <div class="journey-overall-progress">
+
+                <div>
+
+                    <span>
+                        تقدم الرحلة
+                    </span>
+
+                    <strong>
+                        ${journeyProgress}%
+                    </strong>
+
+                </div>
+
+
+                <div class="journey-overall-bar">
+
+                    <div
+                        style="width:${journeyProgress}%">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="journey-day-counter">
+
+                <button
+                    class="journey-nav-button"
+                    ${currentDay === 1 ? "disabled" : ""}
+                    onclick="changeJourneyDay(-1)">
+
+                    ‹
+
+                </button>
+
+
+                <div>
+
+                    <span>
+                        اليوم
+                    </span>
+
+                    <strong>
+                        ${currentDay}
+                    </strong>
+
+                    <span>
+                        من ${journeyDays.length}
+                    </span>
+
+                </div>
+
+
+                <button
+                    class="journey-nav-button"
+                    ${currentDay === journeyDays.length ? "disabled" : ""}
+                    onclick="changeJourneyDay(1)">
+
+                    ›
+
+                </button>
+
+            </div>
+
+
+            <div class="journey-days">
+
+                <div class="journey-day-card" onclick="if (!event.target.closest('button,input,select,textarea,label')) changeJourneyDay(1)">
+
+                    <div class="journey-day-header">
+
+                        <div class="journey-day-icon">
+                            ${day.icon}
+                        </div>
+
+                        <div class="journey-day-info">
+
+                            <span class="journey-day-number">
+                                اليوم ${day.day} من 14
+                            </span>
+
+                            <h3>
+                                ${day.title}
+                            </h3>
+
+                            <span class="journey-date">
+                                ${day.date}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <p class="journey-description">
+                        ${day.description}
+                    </p>
+
+
+                    <div class="journey-progress">
+
+                        <div class="journey-progress-top">
+
+                            <span>
+                                إنجاز اليوم
+                            </span>
+
+                            <strong>
+                                ${progress}%
+                            </strong>
+
+                        </div>
+
+
+                        <div class="journey-progress-bar">
+
+                            <div
+                                class="journey-progress-fill"
+                                style="width:${progress}%">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="journey-tasks">
+
+                        ${day.tasks.map((task, index) => {
+
+                            const completed =
+                                isJourneyTaskCompleted(
+                                    day.day,
+                                    index
+                                );
+
+                            return `
+
+                                <button
+                                    class="journey-task ${completed ? "completed" : ""}"
+                                    onclick="toggleJourneyTask(${day.day}, ${index})">
+
+                                    <span class="task-check">
+                                        ${completed ? "✓" : ""}
+                                    </span>
+
+                                    <span class="task-text">
+                                        ${task}
+                                    </span>
+
+                                </button>
+
+                            `;
+
+                        }).join("")}
+
+                    </div>
+
+
+                    <div class="journey-rating">
+
+                        <div class="journey-rating-title">
+                            ⭐ كيف كان يومك؟
+                        </div>
+
+                        <div class="journey-rating-options">
+
+                            ${[
+                                ["tired", "😔", "متعب"],
+                                ["normal", "😐", "عادي"],
+                                ["good", "🙂", "جيد"],
+                                ["great", "😊", "رائع"],
+                                ["beautiful", "🤍", "يوم جميل"]
+                            ].map(item => {
+
+                                const selected =
+                                    getJourneyRating(day.day) === item[0];
+
+                                return `
+
+                                    <button
+                                        class="journey-rating-button ${selected ? "active" : ""}"
+                                        onclick="setJourneyRating(${day.day}, '${item[0]}')">
+
+                                        <span>
+                                            ${item[1]}
+                                        </span>
+
+                                        <small>
+                                            ${item[2]}
+                                        </small>
+
+                                    </button>
+
+                                `;
+
+                            }).join("")}
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <div class="journey-overall-rating">
+
+    <div class="journey-overall-title">
+        ⭐ تقييم رحلتك حتى الآن
+    </div>
+
+    <div class="journey-overall-content">
+
+        <div class="journey-overall-score">
+            ${getOverallJourneyRating().average || "—"}
+        </div>
+
+        <div class="journey-overall-info">
+            <strong>
+                ${getOverallJourneyRating().label}
+            </strong>
+
+            <span>
+                تم تقييم ${getOverallJourneyRating().count} من 14 يوم
+            </span>
+        </div>
+
+    </div>
+
+</div>
+<div class="journey-navigation">
+
+                <button
+                    class="journey-main-button"
+                    ${currentDay === 1 ? "disabled" : ""}
+                    onclick="changeJourneyDay(-1)">
+
+                    ← اليوم السابق
+
+                </button>
+
+
+                <button
+                    class="journey-main-button"
+                    ${currentDay === journeyDays.length ? "disabled" : ""}
+                    onclick="changeJourneyDay(1)">
+
+                    اليوم التالي →
+
+                </button>
+
+            </div>
 
         `;
+    }
 
 
-        container.appendChild(card);
+    window.changeJourneyDay = function(direction) {
+
+    const newDay =
+        currentDay + direction;
+
+    if (
+        newDay < 1 ||
+        newDay > journeyDays.length
+    ) {
+        return;
+    }
+
+    currentDay = newDay;
+
+    localStorage.setItem(
+        "masaaCurrentJourneyDay",
+        currentDay
+    );
+
+    history.pushState(
+        {
+            masaaRoute: "journey",
+            day: currentDay
+        },
+        "",
+        window.location.pathname +
+        window.location.search +
+        "#journey-" +
+        currentDay
+    );
+
+    renderCurrentDay();
+
+};
 
 
-        if (dayStatus === "today") {
-
-            setTimeout(() => {
-
-                card.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
-                });
-
-            }, 300);
-
-        }
-
-    });
+    renderCurrentDay();
 
 }
+function masaaTapToNext(type) {
 
+    if (type === "umrah") {
+        window.startTawaf();
+        return;
+    }
 
-// ======================================================
-// 🕋 قسم عمرتي
-// ======================================================
+    if (type === "tawaf") {
+        window.nextTawafRound();
+        return;
+    }
 
+    if (type === "sai") {
+        window.nextSaiRound();
+        return;
+    }
+}
 function renderUmrah() {
 
     const section =
@@ -552,180 +857,123 @@ function renderUmrah() {
             "umrahSection"
         );
 
-
     if (!section) return;
 
 
     section.innerHTML = `
 
         <button
-            class="back-button"
-            onclick="closeSections()">
-
-            ← الرئيسية
+            class="back-button" onclick="journeyBack()"> ← الرئيسية
 
         </button>
 
 
+        <h2>
+            🕋 عمرتي
+        </h2>
+
+        <p class="section-subtitle">
+            دليلك خطوة بخطوة لأداء العمرة
+        </p>
+
+
         <div class="umrah-header">
 
-            <div class="umrah-icon">
-                🕋
-            </div>
+            <div class="journey-header">
 
-            <h2>
-                عمرتي
-            </h2>
+                <div class="journey-icon umrah-icon">
+                    🕋
+                </div>
 
-            <p>
-                خطوة بخطوة حتى إتمام العمرة 🤍
-            </p>
+                <div>
 
-        </div>
+                    <strong>
+                        رحلة العمرة
+                    </strong>
 
-
-        <div class="umrah-progress">
-
-            <div class="progress-item active">
-
-                <span>1</span>
-
-                <small>
-                    الإحرام
-                </small>
-
-            </div>
-
-
-            <div class="progress-line"></div>
-
-
-            <div class="progress-item">
-
-                <span>2</span>
-
-                <small>
-                    الطواف
-                </small>
-
-            </div>
-
-
-            <div class="progress-line"></div>
-
-
-            <div class="progress-item">
-
-                <span>3</span>
-
-                <small>
-                    السعي
-                </small>
-
-            </div>
-
-
-            <div class="progress-line"></div>
-
-
-            <div class="progress-item">
-
-                <span>4</span>
-
-                <small>
-                    التقصير
-                </small>
-
-            </div>
-
-        </div>
-
-
-        <div class="umrah-step-card">
-
-            <div class="step-number">
-                الخطوة 1
-            </div>
-
-
-            <h3>
-                🕊️ الاستعداد والإحرام
-            </h3>
-
-
-            <p>
-                استعدي للعمرة بهدوء،
-                واحتسبي كل خطوة تقربين بها إلى الله.
-            </p>
-
-
-            <div class="info-box">
-
-                <h4>
-                    🤍 قبل الإحرام
-                </h4>
-
-                <ul>
-
-                    <li>
-                        الاغتسال والتنظف.
-                    </li>
-
-                    <li>
-                        لبس ملابس الإحرام المناسبة للمرأة.
-                    </li>
-
-                    <li>
-                        الاستعداد للنسك قبل الوصول إلى الميقات.
-                    </li>
-
-                    <li>
-                        تجنب الطيب بعد الدخول في الإحرام.
-                    </li>
-
-                </ul>
-
-            </div>
-
-
-            <div class="info-box">
-
-                <h4>
-                    🤲 النية
-                </h4>
-
-                <p>
-                    تنوي العمرة بقلبها عند الدخول في النسك.
-                </p>
-
-                <p class="note">
-                    النية محلها القلب،
-                    ولا يلزم التلفظ بها بصيغة معينة.
-                </p>
-
-            </div>
-
-
-            <div class="info-box">
-
-                <h4>
-                    📿 التلبية
-                </h4>
-
-
-                <div class="talbiyah">
-
-                    لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ،
-                    لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ،
-                    إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ،
-                    لَا شَرِيكَ لَكَ.
+                    <div>
+                        بهدوء… خطوة بخطوة 🤍
+                    </div>
 
                 </div>
 
+            </div>
 
-                <p class="note">
-                    تكثر من التلبية حتى تبدأ الطواف.
-                </p>
+
+            <div class="umrah-progress">
+
+                <div class="progress-item">
+                    الإحرام
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-item">
+                    الطواف
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-item">
+                    السعي
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-item">
+                    التحلل
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="umrah-step-card" onclick="masaaTapToNext('umrah')">
+
+            <h3>
+                🌙 أولًا: الإحرام
+            </h3>
+
+            <div class="info-box">
+
+                انوي العمرة من الميقات،
+                وابدئي بالتلبية بعد الإحرام.
+
+            </div>
+
+
+            <div class="talbiyah">
+
+                <strong>
+                    التلبية:
+                </strong>
+
+                <br><br>
+
+                لبيك اللهم لبيك،
+                لبيك لا شريك لك لبيك،
+                إن الحمد والنعمة لك والملك،
+                لا شريك لك.
+
+            </div>
+
+
+            <div class="dua">
+
+                🤲
+                أكثري من الدعاء والاستغفار
+                والصلاة على النبي ﷺ.
+
+            </div>
+
+
+            <div class="important">
+
+                ⚠️
+                إذا كان لديكِ شك في حكم من أحكام
+                الإحرام، اسألي أهل العلم ولا تعتمدي
+                على الاجتهاد الشخصي.
 
             </div>
 
@@ -734,7 +982,7 @@ function renderUmrah() {
                 class="primary-button"
                 onclick="startTawaf()">
 
-                🕋 أنا مستعدة للطواف
+                بدأت الطواف 🕋
 
             </button>
 
@@ -744,22 +992,17 @@ function renderUmrah() {
 }
 
 
-// ======================================================
-// 🕋 بداية الطواف
-// ======================================================
+/* =========================================================
+   🕋 TAWAF
+   ========================================================= */
 
 function startTawaf() {
 
     window.tawafRound = 1;
 
     renderTawaf();
-
 }
 
-
-// ======================================================
-// 🕋 عرض الطواف
-// ======================================================
 
 function renderTawaf() {
 
@@ -768,115 +1011,91 @@ function renderTawaf() {
             "umrahSection"
         );
 
-
     if (!section) return;
+
+
+    const round =
+        window.tawafRound || 1;
 
 
     section.innerHTML = `
 
         <button
-            class="back-button"
-            onclick="renderUmrah()">
-
-            ← الإحرام
+            class="back-button" onclick="journeyBack()"> ← الرئيسية
 
         </button>
 
 
-        <div class="umrah-header">
+        <h2>
+            🕋 الطواف
+        </h2>
 
-            <div class="umrah-icon">
-                🕋
-            </div>
-
-            <h2>
-                الطواف
-            </h2>
-
-            <p>
-                سبعة أشواط حول الكعبة 🤍
-            </p>
-
-        </div>
+        <p class="section-subtitle">
+            سبعة أشواط حول الكعبة
+        </p>
 
 
-        <div class="tawaf-counter">
+        <div class="tawaf-counter" onclick="masaaTapToNext('tawaf')">
 
             <div class="counter-title">
-                الشوط
+                الشوط الحالي
             </div>
 
 
-            <div
-                id="tawafNumber"
-                class="counter-number">
-
-                ${window.tawafRound}
-
+            <div class="counter-number">
+                ${round}
             </div>
 
 
             <div class="counter-total">
-                من 7
+                من 7 أشواط
+            </div>
+
+
+            <div
+                id="tawafDots"
+                class="tawaf-dots">
+
+                ${Array.from(
+                    { length: 7 },
+                    (_, i) => `
+                        <span
+                            class="${
+                                i < round
+                                    ? "active"
+                                    : ""
+                            }">
+                        </span>
+                    `
+                ).join("")}
+
             </div>
 
         </div>
 
 
-        <div
-            id="tawafDots"
-            class="tawaf-dots">
+        <div class="info-box">
+
+            🕋 اجعلي الكعبة عن يسارك،
+            وابدئي الشوط من الحجر الأسود.
 
         </div>
 
 
-        <div class="info-box">
+        <div class="dua">
 
-            <h4>
-                🕋 بداية الطواف
-            </h4>
+            🤲
 
-            <p>
-                يبدأ الطواف من جهة الحجر الأسود،
-                ويكون البيت عن يسارك.
-            </p>
-
-            <p class="important">
-                عند محاذاة الحجر الأسود يُشرع التكبير.
-            </p>
+            ليس هناك دعاء محدد لكل شوط،
+            فادعي بما تحبين من خير الدنيا والآخرة.
 
         </div>
 
 
-        <div class="info-box">
+        <div class="note">
 
-            <h4>
-                🤲 ماذا أقول؟
-            </h4>
-
-            <p>
-                ليس هناك دعاء مخصوص صحيح لكل شوط.
-                يمكنكِ الدعاء بما أحببتِ من خير الدنيا والآخرة،
-                والذكر والاستغفار وقراءة القرآن.
-            </p>
-
-        </div>
-
-
-        <div class="info-box">
-
-            <h4>
-                🤍 بين الركن اليماني والحجر الأسود
-            </h4>
-
-
-            <div class="dua">
-
-                رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً،
-                وَفِي الْآخِرَةِ حَسَنَةً،
-                وَقِنَا عَذَابَ النَّارِ.
-
-            </div>
+            ✨ لا تنشغلي بالهاتف أثناء الطواف،
+            واجعلي قلبك حاضرًا مع الله.
 
         </div>
 
@@ -885,23 +1104,30 @@ function renderTawaf() {
             class="primary-button"
             onclick="nextTawafRound()">
 
-            ✅ انتهيت من الشوط
+            ${
+                round < 7
+                    ? "أنهيت هذا الشوط ✓"
+                    : "أنهيت الأشواط السبعة ✓"
+            }
 
         </button>
 
     `;
-
-
-    updateTawaf();
-
 }
 
 
-// ======================================================
-// 🕋 الشوط التالي
-// ======================================================
+function updateTawaf() {
+
+    renderTawaf();
+}
+
 
 function nextTawafRound() {
+
+    if (!window.tawafRound) {
+        window.tawafRound = 1;
+    }
+
 
     if (window.tawafRound < 7) {
 
@@ -909,72 +1135,13 @@ function nextTawafRound() {
 
         renderTawaf();
 
-    }
-
-    else {
+    } else {
 
         finishTawaf();
 
     }
-
 }
 
-
-// ======================================================
-// تحديث عداد الطواف
-// ======================================================
-
-function updateTawaf() {
-
-    const number =
-        document.getElementById(
-            "tawafNumber"
-        );
-
-    const dots =
-        document.getElementById(
-            "tawafDots"
-        );
-
-
-    if (number) {
-
-        number.textContent =
-            window.tawafRound;
-
-    }
-
-
-    if (dots) {
-
-        let result = "";
-
-
-        for (
-            let i = 1;
-            i <= 7;
-            i++
-        ) {
-
-            result +=
-                i <= window.tawafRound
-                    ? "● "
-                    : "○ ";
-
-        }
-
-
-        dots.textContent =
-            result;
-
-    }
-
-}
-
-
-// ======================================================
-// انتهاء الطواف
-// ======================================================
 
 function finishTawaf() {
 
@@ -983,65 +1150,69 @@ function finishTawaf() {
             "umrahSection"
         );
 
-
     if (!section) return;
 
 
     section.innerHTML = `
 
+        <button
+            class="back-button" onclick="journeyBack()"> ← الرئيسية
+
+        </button>
+
+
         <div class="completion-card">
 
             <div class="completion-icon">
-                🤍
+                🕋
             </div>
 
-
             <h2>
-                أحسنتِ يا أيوشتي
+                تم الطواف 🤍
             </h2>
 
+            <p class="special-message">
 
-            <p>
-                أتممتِ سبعة أشواط من الطواف.
+                تقبل الله منكِ،
+                وجعل كل خطوة في ميزان حسناتكِ.
+
             </p>
 
 
-            <p>
-                تقبل الله منكِ وجعلها عمرة مباركة.
-            </p>
+            <div class="dua">
+
+                اللهم تقبل عمرتي،
+                واغفر لي وارحمني،
+                واكتب لي الخير حيث كان.
+
+            </div>
 
 
             <button
                 class="primary-button"
                 onclick="startSai()">
 
-                🏃‍♀️ الانتقال إلى السعي
+                نبدأ السعي 🤍
 
             </button>
 
         </div>
 
     `;
-
 }
 
 
-// ======================================================
-// 🏃‍♀️ بداية السعي
-// ======================================================
+/* =========================================================
+   🏃‍♀️ SAI
+   ========================================================= */
 
 function startSai() {
 
     window.saiRound = 1;
 
     renderSai();
-
 }
 
-
-// ======================================================
-// 🏃‍♀️ عرض السعي
-// ======================================================
 
 function renderSai() {
 
@@ -1050,78 +1221,71 @@ function renderSai() {
             "umrahSection"
         );
 
-
     if (!section) return;
 
 
-    const from =
-        window.saiRound % 2 === 1
+    const round =
+        window.saiRound || 1;
+
+
+    const fromSafa =
+        round % 2 === 1;
+
+
+    const currentPlace =
+        fromSafa
             ? "الصفا"
             : "المروة";
-
-
-    const to =
-        window.saiRound % 2 === 1
-            ? "المروة"
-            : "الصفا";
 
 
     section.innerHTML = `
 
         <button
-            class="back-button"
-            onclick="renderTawaf()">
-
-            ← الطواف
+            class="back-button" onclick="journeyBack()"> ← الرئيسية
 
         </button>
 
 
-        <div class="umrah-header">
+        <h2>
+            🏃‍♀️ السعي
+        </h2>
 
-            <div class="umrah-icon">
-                🏃‍♀️
+        <p class="section-subtitle">
+            سبعة أشواط بين الصفا والمروة
+        </p>
+
+
+        <div class="tawaf-counter" onclick="masaaTapToNext('sai')">
+
+            <div class="counter-title">
+                الشوط الحالي
             </div>
 
 
-            <h2>
-                السعي
-            </h2>
+            <div class="counter-number">
+                ${round}
+            </div>
 
 
-            <p>
-                الشوط ${window.saiRound} من 7
-            </p>
+            <div class="counter-total">
+                من 7 أشواط
+            </div>
 
         </div>
 
 
         <div class="sai-route">
 
-            <div class="sai-point active">
-
-                🟢
-
-                <span>
-                    ${from}
-                </span>
-
+            <div class="sai-point">
+                الصفا
             </div>
-
 
             <div class="sai-arrow">
-                ↓
+                ←
             </div>
-
 
             <div class="sai-point">
-
-                🔵
-
-                <span>
-                    ${to}
-                </span>
-
+                المروة
             </div>
 
         </div>
@@ -1129,28 +1293,25 @@ function renderSai() {
 
         <div class="info-box">
 
-            <h4>
-                🤲 الدعاء والذكر
-            </h4>
+            أنتِ الآن عند
+            <strong>
+                ${currentPlace}
+            </strong>
 
-            <p>
-                ليس لكل شوط من السعي دعاء مخصوص.
-                ادعي بما أحببتِ، واذكري الله بما تيسر.
-            </p>
+            <br>
+
+            ابدئي الشوط من المكان الصحيح
+            واحتسبي الأجر عند الله.
 
         </div>
 
 
-        <div class="info-box">
+        <div class="dua">
 
-            <h4>
-                🌿 تنبيه
-            </h4>
+            🤲
 
-            <p>
-                الهرولة بين العلمين الأخضرين خاصة بالرجال،
-                أما المرأة فتمشي مشيًا معتادًا.
-            </p>
+            ادعي بما تحبين،
+            وأكثرِي من الذكر والاستغفار.
 
         </div>
 
@@ -1159,20 +1320,24 @@ function renderSai() {
             class="primary-button"
             onclick="nextSaiRound()">
 
-            ✅ انتهيت من الشوط
+            ${
+                round < 7
+                    ? "أنهيت هذا الشوط ✓"
+                    : "أنهيت السعي ✓"
+            }
 
         </button>
 
     `;
-
 }
 
 
-// ======================================================
-// الشوط التالي في السعي
-// ======================================================
-
 function nextSaiRound() {
+
+    if (!window.saiRound) {
+        window.saiRound = 1;
+    }
+
 
     if (window.saiRound < 7) {
 
@@ -1180,20 +1345,13 @@ function nextSaiRound() {
 
         renderSai();
 
-    }
-
-    else {
+    } else {
 
         finishSai();
 
     }
-
 }
 
-
-// ======================================================
-// انتهاء السعي
-// ======================================================
 
 function finishSai() {
 
@@ -1202,653 +1360,173 @@ function finishSai() {
             "umrahSection"
         );
 
-
     if (!section) return;
 
 
     section.innerHTML = `
 
+        <button
+            class="back-button" onclick="journeyBack()"> ← الرئيسية
+
+        </button>
+
+
         <div class="completion-card">
 
             <div class="completion-icon">
-                ✂️
+                🤍
             </div>
 
-
             <h2>
-                بقيت خطوة واحدة 🤍
+                تم السعي
             </h2>
 
+            <p class="special-message">
 
-            <p>
-                بعد إتمام السعي،
-                تقصر المرأة من أطراف شعرها،
-                وبذلك تتم عمرتها بإذن الله.
+                بقي التحلل بقص أو تقصير الشعر،
+                وبذلك تتم العمرة بإذن الله.
+
             </p>
+
+
+            <div class="important">
+
+                ✨ للمرأة:
+                تقصّر من أطراف شعرها قدر أنملة
+                تقريبًا من جميع أطراف الشعر.
+
+            </div>
 
 
             <button
                 class="primary-button"
                 onclick="finishUmrah()">
 
-                ✂️ فهمت
+                أتممت العمرة 🤍
 
             </button>
 
         </div>
 
     `;
-
 }
 
 
-// ======================================================
-// ❤️ انتهاء العمرة
-// ======================================================
-
 function finishUmrah() {
+
+    localStorage.setItem(
+        "masaaUmrahCompleted",
+        "true"
+    );
+
 
     const section =
         document.getElementById(
             "umrahSection"
         );
 
-
     if (!section) return;
-
-
-    localStorage.setItem(
-        "ayoushtiUmrahCompleted",
-        "true"
-    );
-
-
-    section.innerHTML = `
-
-        <div class="completion-card">
-
-            <div class="completion-icon">
-                🕋❤️
-            </div>
-
-
-            <h2>
-                تمت العمرة يا أيوشتي
-            </h2>
-
-
-            <p>
-                تقبل الله منكِ عمرتكِ،
-                وغفر لكِ، وكتب لكِ القبول والأجر.
-            </p>
-
-
-            <p class="special-message">
-
-                يا رب تكون العمرة بداية
-                راحة بال،
-                وجبر خاطر،
-                وعوض جميل
-                لكل حاجة نفسها فيها. 🤲🏻❤️
-
-            </p>
-
-
-            <button
-                class="primary-button"
-                onclick="closeSections()">
-
-                ❤️ العودة للرئيسية
-
-            </button>
-
-        </div>
-
-    `;
-
-}
-
-
-// ======================================================
-// 💌 رسائل إسلام اليومية
-// ======================================================
-
-const islamMessages = [
-
-    {
-        title: "اليوم الأول 🤍",
-        message: "يا رب احفظ أيوشتي في أول خطوة من رحلتها، وكن معها في طريقها، واملأ قلبها طمأنينة، واجعل بداية رحلتها بداية لأيام أجمل."
-    },
-
-    {
-        title: "اليوم الثاني 🌿",
-        message: "اللهم ارزق أيوشتي راحة بال لا تزول، وطمأنينة تسكن قلبها، وأبعد عنها كل خوف وحزن وتعب."
-    },
-
-    {
-        title: "اليوم الثالث 🤲🏻",
-        message: "يا رب إنك تعلم ما في قلب أيوشتي أكثر مني، فحقق لها ما تتمنى، واصرف عنها ما يؤذيها، واكتب لها الخير حيث كان."
-    },
-
-    {
-        title: "اليوم الرابع 🕋",
-        message: "اللهم اجعل خطوات أيوشتي إلى بيتك خطوات مباركة، واجعل عمرتها مقبولة، ودعاءها مسموعًا، وقلبها مطمئنًا."
-    },
-
-    {
-        title: "اليوم الخامس ❤️",
-        message: "يا رب عوض أيوشتي عن كل لحظة وجع عاشتها، وعن كل أمنية تأخرت، وعن كل شيء جعل قلبها حزينًا، بعوض جميل يجعلها تقول: الحمد لله أنني انتظرت."
-    },
-
-    {
-        title: "اليوم السادس 🌸",
-        message: "اللهم اجبر قلب أيوشتي جبرًا يتعجب له أهل الأرض والسماء، وارزقها من الخير أكثر مما تتمنى."
-    },
-
-    {
-        title: "اليوم السابع 🤍",
-        message: "يا رب لا تجعل في قلب أيوشتي أمنية إلا وكتبت لها فيها خيرًا، ولا دعاء إلا وسمعتَه، ولا خوفًا إلا وأبدلته أمانًا."
-    },
-
-    {
-        title: "اليوم الثامن 🌙",
-        message: "اللهم اجعل الليل على أيوشتي سكينة، والصباح عليها بشرى، وأيامها القادمة أجمل من كل ما مضى."
-    },
-
-    {
-        title: "اليوم التاسع 🤲🏻",
-        message: "يا رب ارزق أيوشتي راحة تجعلها تنسى كل تعب، وفرحة تجعلها تنسى كل حزن، وعوضًا يجعل قلبها يطمئن بأنك لم تنسها."
-    },
-
-    {
-        title: "اليوم العاشر 🌿",
-        message: "اللهم احفظ أيوشتي من كل سوء، واحفظ قلبها من الحزن، ونفسها من الضيق، وارزقها السكينة في كل أمر."
-    },
-
-    {
-        title: "اليوم الحادي عشر ❤️",
-        message: "يا رب افتح لأيوشتي أبوابًا لم تكن تتوقعها، وارزقها من حيث لا تحتسب، واكتب لها من الأقدار أجملها."
-    },
-
-    {
-        title: "اليوم الثاني عشر 🌸",
-        message: "اللهم إن كان في قلب أيوشتي شيء تخاف ألا يتحقق، فطمئن قلبها، وإن كان فيه أمنية، فاكتب لها فيها الخير وحققها لها بكرمك."
-    },
-
-    {
-        title: "اليوم الثالث عشر 🕋",
-        message: "يا رب تقبل من أيوشتي كل دعاء، وكل دمعة، وكل خطوة، وكل تعب، واجعل هذه الرحلة بداية خير كبير في حياتها."
-    },
-
-    {
-        title: "اليوم الرابع عشر ❤️",
-        message: "اللهم كما أكرمت أيوشتي بزيارة بيتك، فأكرمها بعد عودتها براحة بال، وجبر خاطر، وعوض جميل، وأيام لا ترى فيها إلا الخير."
-    }
-
-];
-
-
-// ======================================================
-// 🤲 أدعية إضافية
-// ======================================================
-
-const islamDuas = [
-
-    "يا رب ارزق أيوشتي راحة بال لا يعكرها شيء، وطمأنينة لا تزول، وقلبًا لا يحمل إلا الخير.",
-
-    "اللهم عوض أيوشتي عوضًا جميلًا عن كل شيء فقدته، وعن كل دعاء ظنت أنه تأخر، وعن كل وجع أخفته في قلبها.",
-
-    "يا رب اجبر قلب أيوشتي جبرًا كاملًا، جبرًا يليق بكرمك، ويجعلها تنسى كل ما أحزنها.",
-
-    "اللهم اجعل القادم في حياة أيوشتي أجمل مما تتمنى، واكتب لها من الخير فوق ما تتخيل.",
-
-    "يا رب إذا ضاق صدر أيوشتي فكن لها سعة، وإذا خافت فكن لها أمانًا، وإذا تعبت فكن لها راحة.",
-
-    "اللهم لا تجعل لأيوشتي أمرًا إلا يسّرته، ولا طريقًا إلا أنرته، ولا أمنية فيها خير إلا حققتها.",
-
-    "يا رب ارزق أيوشتي فرحة قريبة، وفرجًا قريبًا، وخبرًا جميلًا يطمئن قلبها.",
-
-    "اللهم احفظ قلب أيوشتي من الحزن، ونفسها من الضيق، وأيامها من كل ما يؤلمها.",
-
-    "يا رب اجعل هذه العمرة بداية جديدة لأيوشتي، بداية مليئة بالسكينة والبركة والرضا.",
-
-    "اللهم ارزق أيوشتي من الخير ما يجعلها تبتسم كلما تذكرت دعاءها في بيتك.",
-
-    "يا رب لا ترد أيوشتي خائبة، واكتب لها في دعائها الخير والقبول والبركة.",
-
-    "اللهم اكتب لأيوشتي عوضًا جميلًا عن كل انتظار، وفرحة عن كل صبر، وطمأنينة عن كل خوف.",
-
-    "يا رب كن مع أيوشتي في كل خطوة، واحفظها أينما كانت، وأعدها إلينا سالمة مطمئنة.",
-
-    "اللهم اجعل قلب أيوشتي متعلقًا بك، مطمئنًا بك، راضيًا بما قسمت لها، واثقًا بما تخبئه لها من خير.",
-
-    "يا رب إن كانت أيوشتي تحمل في قلبها أمنية لا يعلمها إلا أنت، فحققها لها إن كانت خيرًا، وعوضها عنها خيرًا إن كان غير ذلك."
-
-];
-
-
-// ======================================================
-// 😂 رسائل هزار من إسلام لأيوشتي
-// ======================================================
-
-const islamFunnyMessages = [
-
-    "😂 أيوشتي، تذكير من إدارة إسلام العليا: متنسيش تدعي لأخوك العبقري اللي عامل لكِ التطبيق ده 😂❤️",
-
-    "😂 لو فتحتي التطبيق ولقيتي رسالة مني، اعرفي إن أخوكِ بيراقب مستوى الدلع في الرحلة بنجاح.",
-
-    "📸 أيوشتي، استمتعي بالعمرة… بس متنسيش إن في حد مستني الصور في الناحية التانية 😂",
-
-    "😂 سؤال مهم جدًا: هو ينفع الواحد يعمل عمرة بدل أخته؟ عشان إسلام حاسس إنك واخدة كل البركة لوحدك 😂❤️",
-
-    "😏 تنبيه: الرجوع من العمرة بدون حاجة حلوة لإسلام يعتبر مخالفة صريحة لقوانين الأخوة.",
-
-    "😂 أيوشتي، لو حد سألك مين عمل لكِ التطبيق ده؟ قولي: أخويا إسلام… بس متقوليش له إنه حلو أوي عشان هيصدق نفسه 😂",
-
-    "🤲🏻 دعاء اليوم: يا رب احفظ أيوشتي، وبلغها كل اللي نفسها فيه… وخليها تسمع كلام أخوها ولو مرة واحدة 😂❤️",
-
-    "😂 أيوشتي، متتعبيش نفسك في التصوير… صورة واحدة حلوة تكفيني. وبعدها 47 صورة احتياطي طبعًا 😂📸",
-
-    "😎 إسلام يطمئن عليكِ: هل أكلتي؟ شربتي؟ ارتحتي؟ طيب صوري لنا المكان بقى 😂",
-
-    "😂 لو حسيتي إن التطبيق بيكلمك كتير، متقلقيش… دي مش مشكلة تقنية، ده أخوكِ رخم بس ❤️",
-
-    "🤍 أهم حاجة ترجعي بالسلامة يا أيوشتي، وبعدها هنقعد نسمع كل تفاصيل الرحلة واحدة واحدة… غصب عنك 😂",
-
-    "😂 أيوشتي، استغلي الرحلة في الدعاء… وأنا هتولى مهمة الاستفادة من الصور 😂📸",
-
-    "😏 معلومة سرية: إسلام عامل الرسائل دي مخصوص عشان يفضل يرخم عليكِ حتى وإنتِ بعيدة 😂",
-
-    "😂 لو فتحتي الرسالة دي وإنتِ بتاكلي، كملي أكلك عادي… الرسالة مش هتاخد منكِ لقمة 😂",
-
-    "❤️ ربنا يحفظك يا أيوشتي ويكتب لكِ كل خير، ويخليكي دايمًا مبسوطة… بس متنسيش أخوكي لما ترجعي 😂",
-
-    "😂 اليوم كام؟ مش مهم… المهم إن أيوشتي لسه فاكرة إن عندها أخ اسمه إسلام 😂",
-
-    "📢 إعلان رسمي: أيوشتي مطالبة بالاستمتاع بالرحلة، والدعاء، وتصوير كل حاجة… وخاصة الحاجات اللي إسلام قال عليها 😂",
-
-    "😂 أيوشتي، لو قابلتي إسلام في المنام قولي له يرجع ينام… عنده شغل 😂",
-
-    "🤍 يا رب تكون كل خطوة في الرحلة سبب في راحة قلب أيوشتي، وكل دعوة سبب في فرحة جاية ليها.",
-
-    "😂 وأخيرًا: متنسيش ترجعي… عشان البيت من غير أيوشتي هيبقى هادي زيادة عن اللزوم 😂❤️"
-
-];
-
-
-// ======================================================
-// 🎭 رسائل أخوية عشوائية
-// ======================================================
-
-const islamBrotherMessages = [
-
-    "🤍 ربنا يحفظك يا أيوشتي ويطمن قلبي عليكِ في كل خطوة.",
-
-    "😂 أيوشتي، إسلام موجود… يعني مفيش هروب من الرخامة حتى في العمرة.",
-
-    "❤️ مهما كنتِ بعيدة، أهم حاجة ترجعي لنا سالمة وفرحانة ومطمنة.",
-
-    "🤲🏻 ربنا يكتب لكِ في الرحلة خيرًا كثيرًا، ويحقق لكِ كل أمنية فيها خير.",
-
-    "😂 أيوشتي، خلي بالك من نفسك… أصل إسلام مش ناقص قلق 😂",
-
-    "🤍 ربنا يجعل أيامك هناك كلها راحة وطمأنينة وبركة.",
-
-    "😂 رسالة أخوية مهمة: كلي كويس، اشربي مية، وارتاحي… أيوه أنا أخوكِ مش الدكتور 😂",
-
-    "❤️ ربنا يحفظك من كل سوء ويرجعك لنا بأجمل ذكريات.",
-
-    "😂 لو تعبتي ارتاحي، ولو جعتي كلي، ولو عطشتي اشربي… ولو وحشك أخوكِ افتحي التطبيق 😂",
-
-    "🤲🏻 يا رب كل دعوة تدعيها هناك يكون لها نصيب من القبول والخير."
-
-];
-
-
-// ======================================================
-// 😂 عرض رسالة عشوائية من إسلام
-// ======================================================
-
-function showFunnyMessage() {
-
-    const title =
-        document.getElementById(
-            "islamMessageTitle"
-        );
-
-    const text =
-        document.getElementById(
-            "islamMessageText"
-        );
-
-
-    if (!text) return;
-
-
-    const allMessages = [
-        ...islamFunnyMessages,
-        ...islamBrotherMessages
-    ];
-
-
-    if (!allMessages.length) return;
-
-
-    const randomIndex =
-        Math.floor(
-            Math.random() * allMessages.length
-        );
-
-
-    if (title) {
-
-        title.textContent =
-            "😂 رسالة من إسلام";
-
-    }
-
-
-    text.textContent =
-        allMessages[randomIndex];
-
-}
-
-
-// ======================================================
-// 💌 تحديد رسالة اليوم
-// ======================================================
-
-function getMessageDay() {
-
-    const trip =
-        getTripStatus();
-
-
-    if (
-        trip.status === "during"
-    ) {
-
-        return trip.day;
-
-    }
-
-
-    if (
-        trip.status === "before"
-    ) {
-
-        return 1;
-
-    }
-
-
-    return TRIP_DAYS;
-
-}
-
-
-// ======================================================
-// 💌 عرض رسالة اليوم
-// ======================================================
-
-function renderIslamMessage() {
-
-    const title =
-        document.getElementById(
-            "islamMessageTitle"
-        );
-
-    const text =
-        document.getElementById(
-            "islamMessageText"
-        );
-
-
-    if (!title || !text) return;
-
-
-    const day =
-        getMessageDay();
-
-
-    const index =
-        Math.min(
-            Math.max(day - 1, 0),
-            islamMessages.length - 1
-        );
-
-
-    title.textContent =
-        islamMessages[index].title;
-
-
-    text.textContent =
-        islamMessages[index].message;
-
-}
-
-
-// ======================================================
-// 🤲 عرض دعاء عشوائي
-// ======================================================
-
-function showAnotherDua() {
-
-    const text =
-        document.getElementById(
-            "islamMessageText"
-        );
-
-    const title =
-        document.getElementById(
-            "islamMessageTitle"
-        );
-
-
-    if (!text) return;
-
-
-    if (!islamDuas.length) return;
-
-
-    const randomIndex =
-        Math.floor(
-            Math.random() *
-            islamDuas.length
-        );
-
-
-    if (title) {
-
-        title.textContent =
-            "دعاء من إسلام ❤️";
-
-    }
-
-
-    text.textContent =
-        islamDuas[randomIndex];
-
-}
-
-
-// ======================================================
-// 💌 قسم من إسلام
-// ======================================================
-
-function renderMessagesSection() {
-
-    const section =
-        document.getElementById(
-            "messagesSection"
-        );
-
-
-    if (!section) {
-
-        console.error(
-            "❌ messagesSection غير موجود في index.html"
-        );
-
-        return;
-    }
 
 
     section.innerHTML = `
 
         <button
-            class="back-button"
-            onclick="closeSections()">
-
-            ← الرئيسية
+            class="back-button" onclick="journeyBack()"> ← الرئيسية
 
         </button>
-
-
-        <div class="umrah-header">
-
-            <div class="umrah-icon">
-                💌
-            </div>
-
-
-            <h2>
-                من إسلام إلى أيوشتي
-            </h2>
-
-
-            <p>
-                دعوات ورسائل مخصوصة ليكي ❤️
-            </p>
-
-        </div>
 
 
         <div class="completion-card">
 
             <div class="completion-icon">
-                🤲🏻
+                🌙
             </div>
 
 
-            <h3 id="islamMessageTitle">
-                دعاء من إسلام ❤️
-            </h3>
+            <h2>
+                عمرتك تمت بإذن الله 🤍
+            </h2>
 
 
-            <p
-                id="islamMessageText"
-                class="special-message">
+            <p class="special-message">
+
+                تقبل الله منكِ،
+                وغفر لكِ،
+                وكتب لكِ الأجر والقبول.
 
             </p>
 
 
-            <button
-                class="primary-button"
-                onclick="renderIslamMessage()">
+            <div class="dua">
 
-                📅 دعاء اليوم
+                يا رب اجعلها عمرة مقبولة،
+                وسعيًا مشكورًا،
+                وذنبًا مغفورًا.
 
-            </button>
-
-
-            <button
-                class="primary-button"
-                onclick="showAnotherDua()">
-
-                ❤️ دعاء آخر من إسلام
-
-            </button>
-
-
-            <button
-                class="primary-button"
-                onclick="showFunnyMessage()">
-
-                😂 إسلام بيرخم عليكي
-
-            </button>
+            </div>
 
         </div>
 
     `;
-
-
-    renderIslamMessage();
-
 }
 
 
-// ======================================================
-// 🚀 تشغيل تطبيق أيوشتي
-// ======================================================
 
-function initAyoushti() {
+/* =========================================================
+   🔔 NOTIFICATIONS
+   ========================================================= */
 
-    console.log(
-        "🌙 أيوشتي تعمل"
-    );
-
-
-    // -----------------------------
-    // تحديث بطاقة الرحلة
-    // -----------------------------
-
-    updateTripUI();
-
-
-    // -----------------------------
-    // تحديث رسالة اليوم
-    // -----------------------------
-
-    renderIslamMessage();
-
-
-    // -----------------------------
-    // تسجيل الإشعارات
-    // -----------------------------
-
-    registerAyoushtiNotifications();
-
-}
-
-
-// ======================================================
-// 🔔 تسجيل Service Worker
-// ======================================================
-
-async function registerAyoushtiNotifications() {
+function registerMasaaNotifications() {
 
     if (!("serviceWorker" in navigator)) {
-
-        console.error(
-            "❌ المتصفح لا يدعم Service Worker"
-        );
-
         return;
     }
 
 
-    try {
+    navigator.serviceWorker
+        .register("./service-worker.js")
+        .then(() => {
 
-        const registration =
-            await navigator.serviceWorker.register(
-                "./service-worker.js"
+            console.log(
+                "✅ Masaa Service Worker registered"
             );
 
+        })
+        .catch(error => {
+
+            console.warn(
+                "⚠️ Service Worker registration failed:",
+                error
+            );
+
+        });
+}
+
+
+/* =========================================================
+   🚀 INIT
+   ========================================================= */
+
+function initMasaa() {
+
+    updateTripUI();
+
+    renderIslamMessage();
+
+    registerMasaaNotifications();
+
+
+    console.log(
+        "🌙 Masaa initialized"
+    );
+
+
+    if (
+        typeof Capacitor !== "undefined"
+    ) {
 
         console.log(
-            "✅ تم تسجيل Service Worker",
-            registration
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "❌ فشل تسجيل Service Worker:",
-            error
+            "📱 Capacitor detected"
         );
 
     }
@@ -1856,32 +1534,851 @@ async function registerAyoushtiNotifications() {
 }
 
 
-// ======================================================
-// 🔔 تفعيل إشعارات أيوشتي
-// ======================================================
-
-
-
-
-// ======================================================
-// 🚀 تشغيل التطبيق بعد تحميل الصفحة
-// ======================================================
+/* =========================================================
+   📱 DOM READY
+   ========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
     () => {
 
-        initAyoushti();
-
-        console.log(
-            "🔍 Capacitor:",
-            window.Capacitor
-        );
-
-        console.log(
-            "🔍 LocalNotifications:",
-            window.Capacitor?.Plugins?.LocalNotifications
-        );
+        initMasaa();
 
     }
 );
+/* =========================================================
+   ⚙️ SETTINGS FUNCTIONS
+   ========================================================= */
+
+function setFontSize(size) {
+
+    const root = document.documentElement;
+
+    root.classList.remove(
+        "font-small",
+        "font-normal",
+        "font-large"
+    );
+
+
+    if (size === "small") {
+
+        root.classList.add("font-small");
+
+    } else if (size === "large") {
+
+        root.classList.add("font-large");
+
+    } else {
+
+        root.classList.add("font-normal");
+
+    }
+
+
+    localStorage.setItem(
+        "masaaFontSize",
+        size
+    );
+
+
+    document
+        .querySelectorAll(".font-options button")
+        .forEach(button => {
+
+            button.classList.remove("active");
+
+        });
+
+
+    const activeButton =
+        document.querySelector(
+            `.font-options button[onclick="setFontSize('${size}')"]`
+        );
+
+
+    if (activeButton) {
+        activeButton.classList.add("active");
+    }
+}
+
+
+function loadFontSize() {
+
+    const savedSize =
+        localStorage.getItem(
+            "masaaFontSize"
+        ) || "normal";
+
+
+    setFontSize(savedSize);
+}
+
+
+function resetMasaaData() {
+
+    const confirmed =
+        confirm(
+            "هل أنتِ متأكدة من إعادة ضبط بيانات الرحلة؟\n\nسيتم حذف تقدم العمرة المحفوظ فقط."
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    localStorage.removeItem(
+        "masaaUmrahCompleted"
+    );
+
+
+    localStorage.removeItem(
+        "masaaJourneyProgress"
+    );
+
+
+    localStorage.removeItem(
+        "hifzSession"
+    );
+
+
+    alert(
+        "تمت إعادة ضبط بيانات الرحلة بنجاح 🤍"
+    );
+
+
+    closeSections();
+
+
+    updateTripUI();
+}
+
+
+/* =========================================================
+   ⚙️ LOAD SETTINGS
+   ========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        loadFontSize();
+
+    }
+);
+
+/* =========================================================
+   🌙 MASAA THEME SETTINGS
+   ========================================================= */
+
+function setMasaaTheme(theme) {
+
+    const root = document.documentElement;
+
+    root.classList.remove(
+        "theme-calm",
+        "theme-night",
+        "theme-light"
+    );
+
+    if (theme === "night") {
+
+        root.classList.add("theme-night");
+
+    } else if (theme === "light") {
+
+        root.classList.add("theme-light");
+
+    } else {
+
+        root.classList.add("theme-calm");
+
+    }
+
+    localStorage.setItem(
+        "masaaTheme",
+        theme
+    );
+
+    document
+        .querySelectorAll(".theme-options button")
+        .forEach(button => {
+            button.classList.remove("active");
+        });
+
+    const activeButton = document.querySelector(
+        `.theme-options button[onclick="setMasaaTheme('${theme}')"]`
+    );
+
+    if (activeButton) {
+        activeButton.classList.add("active");
+    }
+}
+
+
+function loadMasaaTheme() {
+
+    const savedTheme =
+        localStorage.getItem("masaaTheme") || "calm";
+
+    setMasaaTheme(savedTheme);
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+        loadMasaaTheme();
+    }
+);
+
+/* =========================================================
+   📅 JOURNEY PROGRESS SYSTEM
+   ========================================================= */
+
+function getJourneyProgress() {
+
+    return JSON.parse(
+        localStorage.getItem("masaaJourneyProgress") || "{}"
+    );
+
+}
+
+
+function saveJourneyProgress(progress) {
+
+    localStorage.setItem(
+        "masaaJourneyProgress",
+        JSON.stringify(progress)
+    );
+
+}
+
+
+function isJourneyTaskCompleted(day, taskIndex) {
+
+    const progress = getJourneyProgress();
+
+    return progress[day]?.tasks?.[taskIndex] === true;
+
+}
+
+
+function toggleJourneyTask(day, taskIndex) {
+
+    const progress = getJourneyProgress();
+
+    if (!progress[day]) {
+
+        progress[day] = {
+            tasks: []
+        };
+
+    }
+
+    progress[day].tasks[taskIndex] =
+        !isJourneyTaskCompleted(day, taskIndex);
+
+    saveJourneyProgress(progress);
+
+    renderJourney();
+
+}
+
+
+function getJourneyDayProgress(dayData) {
+
+    const total = dayData.tasks.length;
+
+    if (!total) {
+        return 0;
+    }
+
+    let completed = 0;
+
+    dayData.tasks.forEach((task, index) => {
+
+        if (isJourneyTaskCompleted(dayData.day, index)) {
+            completed++;
+        }
+
+    });
+
+    return Math.round(
+        (completed / total) * 100
+    );
+
+}
+
+
+console.log("📅 نظام حفظ تقدم رحلة مَسْعَى جاهز");
+
+/* =========================================================
+   ⭐ DAILY JOURNEY RATING
+   ========================================================= */
+
+function getJourneyRatings() {
+
+    return JSON.parse(
+        localStorage.getItem("masaaJourneyRatings") || "{}"
+    );
+
+}
+
+
+function saveJourneyRating(day, rating) {
+
+    const ratings = getJourneyRatings();
+
+    ratings[day] = rating;
+
+    localStorage.setItem(
+        "masaaJourneyRatings",
+        JSON.stringify(ratings)
+    );
+
+}
+
+
+function getJourneyRating(day) {
+
+    const ratings = getJourneyRatings();
+
+    return ratings[day] || null;
+
+}
+
+
+/* ================= OVERALL JOURNEY RATING ================= */
+function getOverallJourneyRating() {
+    const ratings = getJourneyRatings();
+    const values = { tired:1, normal:2, good:3, great:4, beautiful:5 };
+    let total = 0, count = 0;
+
+    Object.keys(ratings).forEach(day => {
+        const value = values[ratings[day]];
+        if (value) {
+            total += value;
+            count++;
+        }
+    });
+
+    if (!count) {
+        return {
+            average: 0,
+            count: 0,
+            label: "لسه الرحلة في بدايتها 🤍"
+        };
+    }
+
+    const average = total / count;
+    let label = "يوم جميل 🤍";
+
+    if (average < 1.8) {
+        label = "محتاجة راحة وهدوء 🤍";
+    } else if (average < 2.8) {
+        label = "أيام هادئة وجميلة 🌸";
+    } else if (average < 3.8) {
+        label = "رحلة جميلة جدًا 🤲🏻";
+    } else if (average < 4.6) {
+        label = "رحلة رائعة ما شاء الله ❤️";
+    } else {
+        label = "رحلة جميلة جدًا ومليانة بالخير 🤍";
+    }
+
+    return {
+        average: Number(average.toFixed(1)),
+        count: count,
+        label: label
+    };
+}
+
+function setJourneyRating(day, rating) {
+
+    saveJourneyRating(day, rating);
+
+    renderJourney();
+
+    console.log(
+        "⭐ تم حفظ تقييم اليوم:",
+        day,
+        rating
+    );
+
+}
+
+
+console.log("⭐ نظام التقييم اليومي جاهز");
+
+/* =========================================================
+   🕋 MASAA FINAL PHONE BACK
+   ========================================================= */
+
+(function () {
+
+    const masaaBaseUrl =
+        window.location.pathname +
+        window.location.search;
+
+    /* الصفحة الحالية = الرئيسية */
+    history.replaceState(
+        { masaaRoute: "home" },
+        "",
+        masaaBaseUrl
+    );
+
+
+    /* فتح الصفحات الرئيسية */
+    const masaaOriginalOpenSection = window.openSection;
+
+    window.openSection = function (section) {
+
+        history.pushState(
+            {
+                masaaRoute: section
+            },
+            "",
+            masaaBaseUrl + "#" + section
+        );
+
+        masaaOriginalOpenSection(section);
+
+        if (
+            section === "duas" &&
+            window.renderDuaHistory
+        ) {
+            window.renderDuaHistory({
+                masaaRoute: "duas"
+            });
+        }
+
+        if (
+            section === "quran" &&
+            window.renderQuranHome
+        ) {
+            window.renderQuranHome();
+        }
+
+        if (
+            section === "hadith" &&
+            window.renderHadithHome
+        ) {
+            window.renderHadithHome();
+        }
+
+        if (
+            section === "nasheeds" &&
+            window.renderNasheedsHome
+        ) {
+            window.renderNasheedsHome();
+        }
+    };
+
+
+    /* بدء الطواف */
+    window.startTawaf = function () {
+
+        window.tawafRound = 1;
+
+        history.pushState(
+            {
+                masaaRoute: "tawaf",
+                round: 1
+            },
+            "",
+            masaaBaseUrl + "#tawaf-1"
+        );
+
+        renderTawaf();
+    };
+
+
+    /* الانتقال بين أشواط الطواف */
+    window.nextTawafRound = function () {
+
+        if (!window.tawafRound) {
+            window.tawafRound = 1;
+        }
+
+        if (window.tawafRound < 7) {
+
+            window.tawafRound++;
+
+            history.pushState(
+                {
+                    masaaRoute: "tawaf",
+                    round: window.tawafRound
+                },
+                "",
+                masaaBaseUrl +
+                "#tawaf-" +
+                window.tawafRound
+            );
+
+            renderTawaf();
+
+        } else {
+
+            history.pushState(
+                {
+                    masaaRoute: "tawaf-finished"
+                },
+                "",
+                masaaBaseUrl + "#tawaf-finished"
+            );
+
+            finishTawaf();
+        }
+    };
+
+
+    /* بدء السعي */
+    window.startSai = function () {
+
+        window.saiRound = 1;
+
+        history.pushState(
+            {
+                masaaRoute: "sai",
+                round: 1
+            },
+            "",
+            masaaBaseUrl + "#sai-1"
+        );
+
+        renderSai();
+    };
+
+
+    /* الانتقال بين أشواط السعي */
+    window.nextSaiRound = function () {
+
+        if (!window.saiRound) {
+            window.saiRound = 1;
+        }
+
+        if (window.saiRound < 7) {
+
+            window.saiRound++;
+
+            history.pushState(
+                {
+                    masaaRoute: "sai",
+                    round: window.saiRound
+                },
+                "",
+                masaaBaseUrl +
+                "#sai-" +
+                window.saiRound
+            );
+
+            renderSai();
+
+        } else {
+
+            history.pushState(
+                {
+                    masaaRoute: "sai-finished"
+                },
+                "",
+                masaaBaseUrl + "#sai-finished"
+            );
+
+            finishSai();
+        }
+    };
+
+
+    /* زر الرجوع في الهاتف */
+    window.addEventListener("popstate", function (event) {
+
+        const state = event.state || {};
+
+        /* الرئيسية */
+        if (state.masaaRoute === "home") {
+
+            window.tawafRound = null;
+            window.saiRound = null;
+
+            closeSections();
+
+            return;
+        }
+
+
+        /* عمرتي */
+        if (state.masaaRoute === "umrah") {
+
+            window.tawafRound = null;
+            window.saiRound = null;
+
+            closeSections();
+
+            const section =
+                document.getElementById("umrahSection");
+
+            if (section) {
+                section.classList.remove("hidden");
+                renderUmrah();
+            }
+
+            document
+                .querySelectorAll(
+                    ".header, .trip-card, .message-card, .notification-button, .menu"
+                )
+                .forEach(element =>
+                    element.classList.add("hidden")
+                );
+
+            return;
+        }
+
+
+        /* أيام الرحلة */
+        if (state.masaaRoute === "journey") {
+
+            window.tawafRound = null;
+            window.saiRound = null;
+
+            const requestedDay =
+                Number(state.day) || 1;
+
+            localStorage.setItem(
+                "masaaCurrentJourneyDay",
+                requestedDay
+            );
+
+            closeSections();
+
+            const section =
+                document.getElementById("journeySection");
+
+            if (section) {
+                section.classList.remove("hidden");
+                renderJourney();
+            }
+
+            document
+                .querySelectorAll(
+                    ".header, .trip-card, .message-card, .notification-button, .menu"
+                )
+                .forEach(element =>
+                    element.classList.add("hidden")
+                );
+
+            return;
+        }
+
+
+        /* أشواط الطواف */
+        if (state.masaaRoute === "tawaf") {
+
+            window.tawafRound =
+                Number(state.round) || 1;
+
+            window.saiRound = null;
+
+            renderTawaf();
+
+            return;
+        }
+
+
+        /* نهاية الطواف */
+        if (state.masaaRoute === "tawaf-finished") {
+
+            window.tawafRound = 7;
+            window.saiRound = null;
+
+            finishTawaf();
+
+            return;
+        }
+
+
+        /* أشواط السعي */
+        if (state.masaaRoute === "sai") {
+
+            window.saiRound =
+                Number(state.round) || 1;
+
+            window.tawafRound = null;
+
+            renderSai();
+
+            return;
+        }
+
+
+        /* نهاية السعي */
+        if (state.masaaRoute === "sai-finished") {
+
+            window.saiRound = 7;
+
+            finishSai();
+
+            return;
+        }
+
+
+        /* القرآن الكريم */
+
+        if (
+            state.masaaRoute === "quran" ||
+            state.masaaRoute === "quran-reader"
+        ) {
+
+            window.tawafRound = null;
+            window.saiRound = null;
+
+            closeSections();
+
+            const quranSection =
+                document.getElementById("quranSection");
+
+            if (quranSection) {
+
+                quranSection.classList.remove("hidden");
+
+                document
+                    .querySelectorAll(
+                        ".header, .trip-card, .message-card, .notification-button, .menu"
+                    )
+                    .forEach(element =>
+                        element.classList.add("hidden")
+                    );
+
+                if (
+                    state.masaaRoute === "quran-reader" &&
+                    window.openQuranSurah
+                ) {
+
+                    /*
+                     * فتح السورة من حالة الـBack.
+                     * quran.js يحتفظ بآخر موضع محليًا.
+                     */
+                    if (window.renderQuranReaderFromHistory) {
+                        window.renderQuranReaderFromHistory(
+                            Number(state.surah) || 1,
+                            Number(state.ayah) || 1
+                        );
+                    }
+
+                } else if (window.renderQuranHome) {
+
+                    window.renderQuranHome();
+                }
+            }
+
+            return;
+        }
+
+        /* الأدعية */
+
+        if (
+            state.masaaRoute === "duas" ||
+            state.masaaRoute === "duas-category" ||
+            state.masaaRoute === "duas-reader"
+        ) {
+
+            window.tawafRound = null;
+            window.saiRound = null;
+
+            closeSections();
+
+            const duasSection =
+                document.getElementById("duasSection");
+
+            if (duasSection) {
+
+                duasSection.classList.remove("hidden");
+
+                document
+                    .querySelectorAll(
+                        ".header, .trip-card, .message-card, .notification-button, .menu"
+                    )
+                    .forEach(element =>
+                        element.classList.add("hidden")
+                    );
+
+                if (window.renderDuaHistory) {
+                    window.renderDuaHistory(state);
+                }
+            }
+
+            return;
+        }
+
+        /* أي حالة غير معروفة = الرئيسية */
+        closeSections();
+    });
+
+})();
+window.journeyBack = function () {
+    closeSections();
+};
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   مَسْعَى — ENTRY SCREEN
+   ========================================================= */
+
+function masaaEnterAsGuest() {
+    const entryScreen = document.getElementById("masaaEntryScreen");
+
+    if (entryScreen) {
+        entryScreen.classList.add("masaa-entry-hidden");
+    }
+
+    document.body.classList.add("masaa-app-entered");
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+function masaaLogin() {
+    alert("تسجيل الدخول سيتم تفعيله في المرحلة القادمة 🤍");
+}
+
+function masaaCreateAccount() {
+    alert("إنشاء الحساب سيتم تفعيله في المرحلة القادمة 🤍");
+}
+
+function initMasaaEntryScreen() {
+    const entryScreen =
+        document.getElementById("masaaEntryScreen");
+
+    if (!entryScreen) {
+        return;
+    }
+
+    const guestSession =
+        sessionStorage.getItem("masaaGuestSession") === "true";
+
+    if (guestSession) {
+        entryScreen.classList.add("masaa-entry-hidden");
+        document.body.classList.add("masaa-app-entered");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    initMasaaEntryScreen();
+});
+
+
+
+
+
+
+
+

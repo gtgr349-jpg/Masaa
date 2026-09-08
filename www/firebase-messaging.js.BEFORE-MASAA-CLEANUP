@@ -1,0 +1,240 @@
+﻿// ======================================================
+// ðŸ”¥ Firebase Messaging - Ø£ÙŠÙˆØ´ØªÙŠ
+// ======================================================
+
+import { initializeApp } from
+    "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+    getMessaging,
+    getToken,
+    onMessage
+} from
+    "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+
+
+// ======================================================
+// ðŸ”¥ Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Firebase
+// ======================================================
+
+const firebaseConfig = {
+
+    apiKey:"AIzaSyAAJLsWAPfnA8TFzorydP6YoGxOA2-3czI",
+
+    authDomain:
+        "ayoushti-de097.firebaseapp.com",
+
+    projectId:
+        "ayoushti-de097",
+
+    storageBucket:
+        "ayoushti-de097.firebasestorage.app",
+
+    messagingSenderId:
+        "788081637968",
+
+    appId:
+        "1:788081637968:web:0b0ca35936a2ac46fb6f55",
+
+    measurementId:
+        "G-3Q9CM1QJT4"
+
+};
+
+
+// ======================================================
+// ðŸš€ ØªØ´ØºÙŠÙ„ Firebase
+// ======================================================
+
+const firebaseApp =
+    initializeApp(firebaseConfig);
+
+
+// ======================================================
+// ðŸ”” ØªØ´ØºÙŠÙ„ Firebase Messaging
+// ======================================================
+
+const messaging =
+    getMessaging(firebaseApp);
+
+
+// ======================================================
+// ðŸ”‘ Ø§Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ Firebase Token
+// ======================================================
+
+async function registerFirebaseMessaging() {
+
+    try {
+
+        // Ø§Ù„ØªØ£ÙƒØ¯ Ù…Ù† Ø¯Ø¹Ù… Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª
+        if (!("Notification" in window)) {
+
+            console.error(
+                "âŒ Ø§Ù„Ù…ØªØµÙØ­ Ù„Ø§ ÙŠØ¯Ø¹Ù… Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª"
+            );
+
+            return;
+        }
+
+
+        // Ø§Ù„ØªØ£ÙƒØ¯ Ù…Ù† Ø§Ù„Ø³Ù…Ø§Ø­
+        if (
+            Notification.permission !==
+            "granted"
+        ) {
+
+            console.warn(
+                "âš ï¸ Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª ØºÙŠØ± Ù…Ø³Ù…ÙˆØ­Ø© Ø­ØªÙ‰ Ø§Ù„Ø¢Ù†"
+            );
+
+            return;
+        }
+
+
+        // Ø§Ù„ØªØ£ÙƒØ¯ Ù…Ù† Service Worker
+        if (
+            !("serviceWorker" in navigator)
+        ) {
+
+            console.error(
+                "âŒ Service Worker ØºÙŠØ± Ù…Ø¯Ø¹ÙˆÙ…"
+            );
+
+            return;
+        }
+
+
+        // Ø§Ù†ØªØ¸Ø§Ø± Service Worker
+        const registration =
+            await navigator.serviceWorker.ready;
+
+
+        console.log(
+            "âœ… Service Worker Ø¬Ø§Ù‡Ø² Ù„Ù€ Firebase"
+        );
+
+
+        // Ø§Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ Token
+        const token =
+            await getToken(
+                messaging,
+                {
+
+                    vapidKey:
+                        "BPUI155KTVpIBoLB9zlfcHxqsgAldYyKcS3OgCzQgOHL_t33tgtMv5y2Skwp19BBAiO5XpwGa3-llkwZADa_FhM",
+
+                    serviceWorkerRegistration:
+                        registration
+
+                }
+            );
+
+
+        // ==================================================
+        // âœ… Ù†Ø¬Ø§Ø­
+        // ==================================================
+
+        if (token) {
+
+            console.log(
+                "ðŸ”¥ Firebase Token ØªÙ… Ø§Ù„Ø­ØµÙˆÙ„ Ø¹Ù„ÙŠÙ‡ Ø¨Ù†Ø¬Ø§Ø­"
+            );
+
+
+            console.log(
+                "ðŸ“± Firebase Token Ù…ÙˆØ¬ÙˆØ¯"
+            );
+
+
+            // Ø­ÙØ¸ Token
+            localStorage.setItem(
+                "ayoushtiFirebaseToken",
+                token
+            );
+
+
+            console.log(
+                "ðŸ’¾ ØªÙ… Ø­ÙØ¸ Firebase Token Ø¨Ù†Ø¬Ø§Ø­"
+            );
+
+        }
+
+
+        // ==================================================
+        // âš ï¸ Ù„Ø§ ÙŠÙˆØ¬Ø¯ Token
+        // ==================================================
+
+        else {
+
+            console.warn(
+                "âš ï¸ Firebase Ù„Ù… ÙŠÙØ±Ø¬Ø¹ Token"
+            );
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "âŒ Firebase Messaging Error:",
+            error
+        );
+
+    }
+
+}
+
+
+// ======================================================
+// ðŸ“© Ø§Ø³ØªÙ‚Ø¨Ø§Ù„ Ø§Ù„Ø±Ø³Ø§Ø¦Ù„ ÙˆØ§Ù„ØªØ·Ø¨ÙŠÙ‚ Ù…ÙØªÙˆØ­
+// ======================================================
+
+onMessage(
+    messaging,
+    payload => {
+
+        console.log(
+            "ðŸ“© Ø±Ø³Ø§Ù„Ø© Firebase ÙˆØµÙ„Øª:",
+            payload
+        );
+
+
+        const notification =
+            payload.notification || {};
+
+
+        if (
+            Notification.permission ===
+            "granted"
+        ) {
+
+            new Notification(
+
+                notification.title ||
+                "ðŸŒ™ Ø£ÙŠÙˆØ´ØªÙŠ",
+
+                {
+
+                    body:
+                        notification.body ||
+                        "ðŸ’Œ Ø±Ø³Ø§Ù„Ø© Ø¬Ø¯ÙŠØ¯Ø© Ù…Ù† Ø¥Ø³Ù„Ø§Ù… â¤ï¸",
+
+                    icon:
+                        "./icon-192.png"
+
+                }
+
+            );
+
+        }
+
+    }
+);
+
+
+// ======================================================
+// ðŸš€ ØªØ´ØºÙŠÙ„ Firebase Messaging
+// ======================================================
+
+registerFirebaseMessaging();

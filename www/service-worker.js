@@ -1,8 +1,8 @@
 ﻿// ======================================================
-// 🌙 أيوشتي — Offline Service Worker
+// 🌙 مَسْعَى — Offline Service Worker
 // ======================================================
 
-const CACHE_NAME = "ayoushti-v4";
+const CACHE_NAME = "masaa-v1";
 
 const FILES_TO_CACHE = [
     "./",
@@ -10,7 +10,6 @@ const FILES_TO_CACHE = [
     "./style.css",
     "./app.js",
     "./journey.js",
-    "./map.js",
     "./manifest.json",
     "./icon-192.png",
     "./icon-512.png"
@@ -23,7 +22,7 @@ const FILES_TO_CACHE = [
 
 self.addEventListener("install", event => {
 
-    console.log("📥 أيوشتي: بدء حفظ ملفات Offline");
+    console.log("📥 مَسْعَى: بدء حفظ ملفات Offline");
 
     event.waitUntil(
 
@@ -56,7 +55,7 @@ self.addEventListener("install", event => {
             .then(() => {
 
                 console.log(
-                    "🌙 أيوشتي: انتهى حفظ ملفات Offline"
+                    "🌙 مَسْعَى: انتهى حفظ ملفات Offline"
                 );
 
                 return self.skipWaiting();
@@ -156,7 +155,10 @@ self.addEventListener("fetch", event => {
 
 
 console.log(
-    "🌙 أيوشتي Service Worker جاهز للعمل Offline"
+    "🌙 مَسْعَى Service Worker جاهز للعمل Offline"
 );
+
+
+
 
 

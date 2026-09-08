@@ -1,5 +1,5 @@
-// ======================================================
-// 🔥 Firebase Messaging - أيوشتي
+﻿// ======================================================
+// ðŸ”¥ Firebase Messaging - Ø£ÙŠÙˆØ´ØªÙŠ
 // ======================================================
 
 import { initializeApp } from
@@ -14,7 +14,7 @@ import {
 
 
 // ======================================================
-// 🔥 إعدادات Firebase
+// ðŸ”¥ Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Firebase
 // ======================================================
 
 const firebaseConfig = {
@@ -43,7 +43,7 @@ const firebaseConfig = {
 
 
 // ======================================================
-// 🚀 تشغيل Firebase
+// ðŸš€ ØªØ´ØºÙŠÙ„ Firebase
 // ======================================================
 
 const firebaseApp =
@@ -51,7 +51,7 @@ const firebaseApp =
 
 
 // ======================================================
-// 🔔 تشغيل Firebase Messaging
+// ðŸ”” ØªØ´ØºÙŠÙ„ Firebase Messaging
 // ======================================================
 
 const messaging =
@@ -59,62 +59,62 @@ const messaging =
 
 
 // ======================================================
-// 🔑 الحصول على Firebase Token
+// ðŸ”‘ Ø§Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ Firebase Token
 // ======================================================
 
 async function registerFirebaseMessaging() {
 
     try {
 
-        // التأكد من دعم الإشعارات
+        // Ø§Ù„ØªØ£ÙƒØ¯ Ù…Ù† Ø¯Ø¹Ù… Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª
         if (!("Notification" in window)) {
 
             console.error(
-                "❌ المتصفح لا يدعم الإشعارات"
+                "âŒ Ø§Ù„Ù…ØªØµÙØ­ Ù„Ø§ ÙŠØ¯Ø¹Ù… Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª"
             );
 
             return;
         }
 
 
-        // التأكد من السماح
+        // Ø§Ù„ØªØ£ÙƒØ¯ Ù…Ù† Ø§Ù„Ø³Ù…Ø§Ø­
         if (
             Notification.permission !==
             "granted"
         ) {
 
             console.warn(
-                "⚠️ الإشعارات غير مسموحة حتى الآن"
+                "âš ï¸ Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª ØºÙŠØ± Ù…Ø³Ù…ÙˆØ­Ø© Ø­ØªÙ‰ Ø§Ù„Ø¢Ù†"
             );
 
             return;
         }
 
 
-        // التأكد من Service Worker
+        // Ø§Ù„ØªØ£ÙƒØ¯ Ù…Ù† Service Worker
         if (
             !("serviceWorker" in navigator)
         ) {
 
             console.error(
-                "❌ Service Worker غير مدعوم"
+                "âŒ Service Worker ØºÙŠØ± Ù…Ø¯Ø¹ÙˆÙ…"
             );
 
             return;
         }
 
 
-        // انتظار Service Worker
+        // Ø§Ù†ØªØ¸Ø§Ø± Service Worker
         const registration =
             await navigator.serviceWorker.ready;
 
 
         console.log(
-            "✅ Service Worker جاهز لـ Firebase"
+            "âœ… Service Worker Ø¬Ø§Ù‡Ø² Ù„Ù€ Firebase"
         );
 
 
-        // الحصول على Token
+        // Ø§Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ Token
         const token =
             await getToken(
                 messaging,
@@ -131,43 +131,43 @@ async function registerFirebaseMessaging() {
 
 
         // ==================================================
-        // ✅ نجاح
+        // âœ… Ù†Ø¬Ø§Ø­
         // ==================================================
 
         if (token) {
 
             console.log(
-                "🔥 Firebase Token تم الحصول عليه بنجاح"
+                "ðŸ”¥ Firebase Token ØªÙ… Ø§Ù„Ø­ØµÙˆÙ„ Ø¹Ù„ÙŠÙ‡ Ø¨Ù†Ø¬Ø§Ø­"
             );
 
 
             console.log(
-                "📱 Firebase Token موجود"
+                "ðŸ“± Firebase Token Ù…ÙˆØ¬ÙˆØ¯"
             );
 
 
-            // حفظ Token
+            // Ø­ÙØ¸ Token
             localStorage.setItem(
-                "ayoushtiFirebaseToken",
+                "masaaFirebaseToken",
                 token
             );
 
 
             console.log(
-                "💾 تم حفظ Firebase Token بنجاح"
+                "ðŸ’¾ ØªÙ… Ø­ÙØ¸ Firebase Token Ø¨Ù†Ø¬Ø§Ø­"
             );
 
         }
 
 
         // ==================================================
-        // ⚠️ لا يوجد Token
+        // âš ï¸ Ù„Ø§ ÙŠÙˆØ¬Ø¯ Token
         // ==================================================
 
         else {
 
             console.warn(
-                "⚠️ Firebase لم يُرجع Token"
+                "âš ï¸ Firebase Ù„Ù… ÙŠÙØ±Ø¬Ø¹ Token"
             );
 
         }
@@ -177,7 +177,7 @@ async function registerFirebaseMessaging() {
     catch (error) {
 
         console.error(
-            "❌ Firebase Messaging Error:",
+            "âŒ Firebase Messaging Error:",
             error
         );
 
@@ -187,7 +187,7 @@ async function registerFirebaseMessaging() {
 
 
 // ======================================================
-// 📩 استقبال الرسائل والتطبيق مفتوح
+// ðŸ“© Ø§Ø³ØªÙ‚Ø¨Ø§Ù„ Ø§Ù„Ø±Ø³Ø§Ø¦Ù„ ÙˆØ§Ù„ØªØ·Ø¨ÙŠÙ‚ Ù…ÙØªÙˆØ­
 // ======================================================
 
 onMessage(
@@ -195,7 +195,7 @@ onMessage(
     payload => {
 
         console.log(
-            "📩 رسالة Firebase وصلت:",
+            "ðŸ“© Ø±Ø³Ø§Ù„Ø© Firebase ÙˆØµÙ„Øª:",
             payload
         );
 
@@ -212,13 +212,13 @@ onMessage(
             new Notification(
 
                 notification.title ||
-                "🌙 أيوشتي",
+                "ðŸŒ™ Ø£ÙŠÙˆØ´ØªÙŠ",
 
                 {
 
                     body:
                         notification.body ||
-                        "💌 رسالة جديدة من إسلام ❤️",
+                        "ðŸ’Œ Ø±Ø³Ø§Ù„Ø© Ø¬Ø¯ÙŠØ¯Ø© Ù…Ù† Ø¥Ø³Ù„Ø§Ù… â¤ï¸",
 
                     icon:
                         "./icon-192.png"
@@ -234,7 +234,8 @@ onMessage(
 
 
 // ======================================================
-// 🚀 تشغيل Firebase Messaging
+// ðŸš€ ØªØ´ØºÙŠÙ„ Firebase Messaging
 // ======================================================
 
 registerFirebaseMessaging();
+
