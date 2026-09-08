@@ -1930,6 +1930,44 @@ console.log("⭐ نظام التقييم اليومي جاهز");
         );
     }
 
+    /* استرجاع القسم الحالي بعد إعادة تحميل الصفحة */
+    window.addEventListener("DOMContentLoaded", function () {
+
+        const hash = window.location.hash.replace(/^#/, "");
+
+        if (!hash) return;
+
+        if (hash === "duas") {
+            window.openSection("duas");
+            return;
+        }
+
+        if (hash === "quran") {
+            window.openSection("quran");
+            return;
+        }
+
+        if (hash === "hadith") {
+            window.openSection("hadith");
+            return;
+        }
+
+        if (hash === "nasheeds") {
+            window.openSection("nasheeds");
+            return;
+        }
+
+        if (hash === "umrah") {
+            window.openSection("umrah");
+            return;
+        }
+
+        if (hash === "journey") {
+            window.openSection("journey");
+            return;
+        }
+
+    });
     /* فتح الصفحات الرئيسية */
     const masaaOriginalOpenSection = window.openSection;
 
@@ -2376,6 +2414,7 @@ function initMasaaEntryScreen() {
 document.addEventListener("DOMContentLoaded", () => {
     initMasaaEntryScreen();
 });
+
 
 
 
