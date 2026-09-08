@@ -1921,13 +1921,14 @@ console.log("⭐ نظام التقييم اليومي جاهز");
         window.location.pathname +
         window.location.search;
 
-    /* الصفحة الحالية = الرئيسية */
-    history.replaceState(
-        { masaaRoute: "home" },
-        "",
-        masaaBaseUrl
-    );
-
+    /* الصفحة الحالية = الرئيسية فقط عند عدم وجود مسار */
+    if (!window.location.hash) {
+        history.replaceState(
+            { masaaRoute: "home" },
+            "",
+            masaaBaseUrl
+        );
+    }
 
     /* فتح الصفحات الرئيسية */
     const masaaOriginalOpenSection = window.openSection;
@@ -2375,6 +2376,8 @@ function initMasaaEntryScreen() {
 document.addEventListener("DOMContentLoaded", () => {
     initMasaaEntryScreen();
 });
+
+
 
 
 
