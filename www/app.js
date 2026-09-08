@@ -1973,6 +1973,28 @@ console.log("⭐ نظام التقييم اليومي جاهز");
 
     window.openSection = function (section) {
 
+        /*
+         * الأدعية أصبحت تحت إدارة MasaaNavigation.
+         * نستخدم النظام المركزي فقط لهذا القسم في هذه المرحلة.
+         */
+        if (section === "duas" && window.MasaaNavigation) {
+
+            MasaaNavigation.goToDuas();
+
+            if (window.renderDuaHistory) {
+                window.renderDuaHistory({
+                    masaaNavigation: true,
+                    masaaRoute: "duas"
+                });
+            }
+
+            return;
+        }
+
+        /*
+         * باقي الأقسام تظل على النظام القديم مؤقتًا
+         * حتى ننقلها تدريجيًا إلى Navigation Manager.
+         */
         history.pushState(
             {
                 masaaRoute: section
@@ -1982,15 +2004,6 @@ console.log("⭐ نظام التقييم اليومي جاهز");
         );
 
         masaaOriginalOpenSection(section);
-
-        if (
-            section === "duas" &&
-            window.renderDuaHistory
-        ) {
-            window.renderDuaHistory({
-                masaaRoute: "duas"
-            });
-        }
 
         if (
             section === "quran" &&
@@ -2133,6 +2146,14 @@ console.log("⭐ نظام التقييم اليومي جاهز");
     window.addEventListener("popstate", function (event) {
 
         const state = event.state || {};
+
+        /*
+         * أي History تم إنشاؤه بواسطة Navigation Manager
+         * يتم التعامل معه مركزيًا، ولا يتدخل فيه app.js.
+         */
+        if (state.masaaNavigation === true) {
+            return;
+        }
 
         /* الرئيسية */
         if (state.masaaRoute === "home") {
@@ -2414,6 +2435,7 @@ function initMasaaEntryScreen() {
 document.addEventListener("DOMContentLoaded", () => {
     initMasaaEntryScreen();
 });
+
 
 
 

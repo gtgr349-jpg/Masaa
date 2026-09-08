@@ -116,9 +116,9 @@
         showDuasSection();
 
         currentCategory = categoryId;
+        currentIndex = 0;
 
         const content = getContent();
-
         if (!content) return;
 
         const category = categories.find(
@@ -127,7 +127,7 @@
 
         const list = duaData[categoryId] || [];
 
-        if (!list.length) {
+        if (!category || !list.length) {
             content.innerHTML = `
                 <button
                     class="dua-inner-back-pro"
@@ -140,13 +140,50 @@
                     لا توجد أدعية حاليًا.
                 </div>
             `;
-
             return;
         }
 
-        currentIndex = 0;
+        content.innerHTML = `
+            <button
+                class="dua-inner-back-pro"
+                type="button"
+                onclick="window.duasBackToCategories()">
+                ← الأدعية
+            </button>
 
-        renderSingleDua(category, list);
+            <div class="dua-reader-header-pro">
+                <div>
+                    <small>قسم الأدعية</small>
+                    <strong>${category.title}</strong>
+                </div>
+
+                <span>${list.length} أدعية</span>
+            </div>
+
+            <div class="duas-category-list-pro">
+                ${list.map((dua, index) => `
+                    <button
+                        type="button"
+                        class="dua-category-card-pro"
+                        onclick="window.openDua('${categoryId}', ${index})">
+
+                        <span class="dua-category-icon-pro">
+                            ${category.icon}
+                        </span>
+
+                        <span class="dua-category-text-pro">
+                            <strong>${dua[0]}</strong>
+                            <small>${index + 1} من ${list.length}</small>
+                        </span>
+
+                        <span class="dua-category-arrow">
+                            ‹
+                        </span>
+
+                    </button>
+                `).join("")}
+            </div>
+        `;
     }
 
     function renderSingleDua(category, list) {
@@ -231,6 +268,8 @@
         return duaData[currentCategory] || [];
     }
 
+    // ===== مَسْعَى Navigation Manager =====
+
     window.openDuaCategory = function (categoryId) {
 
         const list = duaData[categoryId] || [];
@@ -240,31 +279,34 @@
         currentCategory = categoryId;
         currentIndex = 0;
 
-        history.pushState(
-            {
-                masaaRoute: "duas-category",
-                category: categoryId
-            },
-            "",
-            location.pathname +
-            location.search +
-            "#duas-category-" +
-            categoryId
-        );
+        if (window.MasaaNavigation) {
+            MasaaNavigation.goToDuaCategory(categoryId);
+        }
 
-        history.pushState(
-            {
-                masaaRoute: "duas-reader",
-                category: categoryId,
-                index: 0
-            },
-            "",
-            location.pathname +
-            location.search +
-            "#dua-" +
-            categoryId +
-            "-0"
-        );
+        renderCategory(categoryId);
+    };
+
+
+    window.openDua = function (categoryId, index) {
+
+        const list = duaData[categoryId] || [];
+        const safeIndex = Number(index);
+
+        if (
+            !list.length ||
+            !Number.isInteger(safeIndex) ||
+            safeIndex < 0 ||
+            safeIndex >= list.length
+        ) {
+            return;
+        }
+
+        currentCategory = categoryId;
+        currentIndex = safeIndex;
+
+        if (window.MasaaNavigation) {
+            MasaaNavigation.goToDua(categoryId, safeIndex);
+        }
 
         const category = categories.find(
             item => item.id === categoryId
@@ -272,6 +314,7 @@
 
         renderSingleDua(category, list);
     };
+
 
     window.nextDua = function () {
 
@@ -281,22 +324,17 @@
 
         if (currentIndex >= list.length - 1) return;
 
-        currentIndex++;
+        const nextIndex = currentIndex + 1;
 
-        history.pushState(
-            {
-                masaaRoute: "duas-reader",
-                category: currentCategory,
-                index: currentIndex
-            },
-            "",
-            location.pathname +
-            location.search +
-            "#dua-" +
-            currentCategory +
-            "-" +
-            currentIndex
-        );
+        currentIndex = nextIndex;
+
+        if (window.MasaaNavigation) {
+            MasaaNavigation.nextDua(
+                currentCategory,
+                nextIndex - 1
+            );
+            return;
+        }
 
         const category = categories.find(
             item => item.id === currentCategory
@@ -305,110 +343,88 @@
         renderSingleDua(category, list);
     };
 
+
     window.previousDua = function () {
 
         if (currentIndex <= 0) return;
 
+        if (window.MasaaNavigation) {
+            MasaaNavigation.back();
+            return;
+        }
+
         history.back();
     };
+
 
     window.duasBackToCategories = function () {
 
-        const state = history.state || {};
-
-        if (state.masaaRoute === "duas-reader") {
-
-            const index =
-                Number(state.index) || 0;
-
-            history.go(-(index + 2));
+        if (!currentCategory) {
+            window.showDuasCategories();
             return;
         }
 
-        if (state.masaaRoute === "duas-category") {
-            history.back();
+        if (window.MasaaNavigation) {
+
+            MasaaNavigation.replace(
+                "duas-category",
+                {
+                    section: "duas",
+                    category: currentCategory
+                },
+                "#duas-category-" +
+                encodeURIComponent(currentCategory)
+            );
+
+            renderCategory(currentCategory);
             return;
         }
 
-        history.back();
+        renderCategory(currentCategory);
     };
+
 
     window.duasBackToHome = function () {
 
-        const state = history.state || {};
-
-        if (state.masaaRoute === "duas-reader") {
-
-            const index =
-                Number(state.index) || 0;
-
-            history.go(-(index + 3));
-            return;
-        }
-
-        if (state.masaaRoute === "duas-category") {
-
-            history.go(-2);
-            return;
-        }
-
-        if (state.masaaRoute === "duas") {
-
-            history.back();
+        if (window.MasaaNavigation) {
+            MasaaNavigation.home();
             return;
         }
 
         history.back();
     };
 
+
     window.showDuasCategories = function () {
 
-        const currentState = history.state || {};
+        if (window.MasaaNavigation) {
 
-        if (
-            currentState.masaaRoute === "duas" ||
-            currentState.masaaRoute === "duas-category" ||
-            currentState.masaaRoute === "duas-reader"
-        ) {
-
-            history.replaceState(
-                {
-                    masaaRoute: "duas"
-                },
-                "",
-                location.pathname +
-                location.search +
-                "#duas"
-            );
+            MasaaNavigation.goToDuas();
 
             renderCategories();
             return;
         }
-
-        history.pushState(
-            {
-                masaaRoute: "duas"
-            },
-            "",
-            location.pathname +
-            location.search +
-            "#duas"
-        );
 
         renderCategories();
     };
 
+
     window.renderDuaHistory = function (state) {
 
         if (!state) return;
 
         if (state.masaaRoute === "duas") {
+
             renderCategories();
             return;
         }
 
         if (state.masaaRoute === "duas-category") {
-            renderCategory(state.category);
+
+            currentCategory = state.category;
+            currentIndex = 0;
+
+            renderCategory(currentCategory);
             return;
         }
 
@@ -423,147 +439,14 @@
 
             const list = getCurrentList();
 
-            renderSingleDua(category, list);
-        }
-    };
-
-
-    // ===== الإصلاح النهائي للتنقل في الأدعية =====
-
-    window.openDuaCategory = function (categoryId) {
-
-        const list = duaData[categoryId] || [];
-
-        if (!list.length) return;
-
-        currentCategory = categoryId;
-        currentIndex = 0;
-
-        history.pushState(
-            {
-                masaaRoute: "duas-category",
-                category: categoryId
-            },
-            "",
-            location.pathname +
-            location.search +
-            "#duas-category-" +
-            categoryId
-        );
-
-        history.pushState(
-            {
-                masaaRoute: "duas-reader",
-                category: categoryId,
-                index: 0
-            },
-            "",
-            location.pathname +
-            location.search +
-            "#dua-" +
-            categoryId +
-            "-0"
-        );
-
-        const category = categories.find(
-            item => item.id === categoryId
-        );
-
-        renderSingleDua(category, list);
-    };
-
-
-    // عند الرجوع من الدعاء إلى التصنيفات
-    window.duasBackToCategories = function () {
-
-        const state = history.state || {};
-
-        if (state.masaaRoute === "duas-reader") {
-
-            const index = Number(state.index) || 0;
-
-            history.go(-(index + 2));
-            return;
-        }
-
-        if (state.masaaRoute === "duas-category") {
-
-            history.back();
-            return;
-        }
-
-        history.back();
-    };
-
-
-    // الرجوع للرئيسية
-    window.duasBackToHome = function () {
-
-        const state = history.state || {};
-
-        if (state.masaaRoute === "duas-reader") {
-            const index = Number(state.index) || 0;
-            history.go(-(index + 3));
-            return;
-        }
-
-        if (state.masaaRoute === "duas-category") {
-
-            history.go(-2);
-            return;
-        }
-
-        if (state.masaaRoute === "duas") {
-
-            history.back();
-            return;
-        }
-
-        history.back();
-    };
-
-
-    // عند الرجوع بالـ Back إلى التصنيف
-    window.renderDuaHistory = function (state) {
-
-        if (!state) return;
-
-        if (state.masaaRoute === "duas") {
-            renderCategories();
-            return;
-        }
-
-        if (state.masaaRoute === "duas-category") {
-
-            // التصنيف يعرض قائمة التصنيفات
-            renderCategories();
-            return;
-        }
-
-        if (state.masaaRoute === "duas-reader") {
-
-            currentCategory = state.category;
-            currentIndex = Number(state.index) || 0;
-
-            const category = categories.find(
-                item => item.id === currentCategory
-            );
-
-            const list = getCurrentList();
+            if (!category || !list.length) {
+                renderCategories();
+                return;
+            }
 
             renderSingleDua(category, list);
         }
     };
+
 })();
-
-
-
-
-
-
-
-
-
-
-
 

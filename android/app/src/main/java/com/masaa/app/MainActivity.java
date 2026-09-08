@@ -1,5 +1,6 @@
-package com.eslamashour.ayoushti;
+﻿package com.masaa.app;
 
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {}
+

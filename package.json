@@ -1,5 +1,5 @@
-{
-  "name": "ayoshti",
+﻿{
+  "name": "masaa",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -17,3 +17,4 @@
     "@capacitor/local-notifications": "^8.3.1"
   }
 }
+

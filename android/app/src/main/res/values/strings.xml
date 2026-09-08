@@ -1,7 +1,8 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Ayoushti</string>
-    <string name="title_activity_main">Ayoushti</string>
-    <string name="package_name">com.eslamashour.ayoushti</string>
-    <string name="custom_url_scheme">com.eslamashour.ayoushti</string>
+    <string name="app_name">مَسْعَى</string>
+    <string name="title_activity_main">مَسْعَى</string>
+    <string name="package_name">com.masaa.app</string>
+    <string name="custom_url_scheme">com.masaa.app</string>
 </resources>
+
